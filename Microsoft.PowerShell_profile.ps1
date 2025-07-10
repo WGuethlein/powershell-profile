@@ -1,14 +1,12 @@
-# Function to Base64 encode a string
-function Convert-ToBase64 {
-    param(
-        [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-        [string]$Text
-    )
-    
-    $Bytes = [System.Text.Encoding]::UTF8.GetBytes($Text)
-    $EncodedText = [Convert]::ToBase64String($Bytes)
-    return $EncodedText
+$ScriptFolder = ".\Functions"
+if (Test-Path $ScriptFolder) {
+    Get-ChildItem -Path $ScriptFolder -Filter "*.ps1" -File | ForEach-Object {
+        try {
+            Write-Host "Loading: $($_.Name)" -ForegroundColor Green
+            . $_.FullName
+        }
+        catch {
+            Write-Warning "Failed to load script: $($_.Name) - $($_.Exception.Message)"
+        }
+    }
 }
-
-# Create an alias for the function
-Set-Alias -Name B64E -Value Convert-ToBase64
