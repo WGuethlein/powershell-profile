@@ -10,3 +10,9 @@ if (Test-Path $ScriptFolder) {
         }
     }
 }
+
+Import-Module Terminal-Icons
+
+Oh-My-Posh init pwsh --config $PSSCRIPTROOT\OMP\my.omp.json | Invoke-Expression
+Enable-Poshtooltips
+Write-Host

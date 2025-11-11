@@ -1,0 +1,92 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "blocks": [
+    {
+      "alignment": "left",
+      "segments": [
+        {
+          "background": "#333333",
+          "foreground": "#ff0000",
+          "leading_diamond": "\ue0b6",
+          "style": "diamond",
+          "type": "session"
+        },
+        {
+          "background": "#1BD760",
+          "foreground": "#434343",
+          "powerline_symbol": "\ue0b0",
+          "style": "powerline",
+          "type": "spotify"
+        },
+        {
+          "background": "#ff0000",
+          "foreground": "#000000",
+          "powerline_symbol": "\ue0b0",
+          "properties": {
+            "style": "folder"
+          },
+          "style": "powerline",
+          "type": "path"
+        },
+        {
+          "background": "#fffb38",
+          "foreground": "#193549",
+          "powerline_symbol": "\ue0b0",
+          "properties": {
+            "fetch_stash_count": true,
+            "fetch_upstream_icon": true
+          },
+          "style": "powerline",
+          "type": "git"
+        },
+        {
+          "background": "#6CA35E",
+          "foreground": "#ffffff",
+          "powerline_symbol": "\ue0b0",
+          "style": "powerline",
+          "type": "node"
+        },
+        {
+          "background": "#203248",
+          "foreground": "#ffffff",
+          "powerline_symbol": "\ue0b0",
+          "style": "powerline",
+          "type": "shell"
+        },
+        {
+          "background": "#ffff66",
+          "foreground": "#000000",
+          "powerline_symbol": "\ue0b0",
+          "style": "powerline",
+          "type": "root"
+        },
+        {
+          "background": "#272727",
+          "foreground": "#ffffff",
+          "powerline_symbol": "\ue0b0",
+          "properties": {
+            "threshold": 0
+          },
+          "style": "powerline",
+          "type": "executiontime"
+        },
+        {
+          "background": "#2e9599",
+          "background_templates": [
+            "{{ if gt .Code 0 }}#f1184c{{ end }}"
+          ],
+          "foreground": "#ffffff",
+          "powerline_symbol": "\ue0b0",
+          "properties": {
+            "always_enabled": true
+          },
+          "style": "powerline",
+          "type": "exit"
+        }
+      ],
+      "type": "prompt"
+    }
+  ],
+  "final_space": true,
+  "version": 2
+}

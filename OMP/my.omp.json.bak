@@ -1,0 +1,102 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "blocks": [
+    {
+      "alignment": "left",
+      "segments": [
+        {
+          "foreground": "red",
+          "style": "plain",
+          "template": "\u256d",
+          "type": "text"
+        },
+        {
+          "background": "#1d2021",
+          "foreground": "lightRed",
+          "leading_diamond": "\ue0b6",
+          "style": "diamond",
+          "type": "session"
+        },
+        {
+          "background": "#282828",
+          "foreground": "lightGreen",
+          "powerline_symbol": "\ue0b0",
+          "properties": {
+            "fetch_stash_count": true,
+            "fetch_upstream_icon": true
+          },
+          "style": "powerline",
+          "type": "git"
+        },
+        {
+          "background": "#3c3836",
+          "foreground": "lightYellow",
+          "powerline_symbol": "\ue0b0",
+          "style": "powerline",
+          "type": "shell"
+        },
+        {
+          "background": "#3c3836",
+          "foreground": "lightYellow",
+          "powerline_symbol": "\ue0b0",
+          "style": "powerline",
+          "type": "root"
+        },
+        {
+          "background": "#504945",
+          "foreground": "lightBlue",
+          "powerline_symbol": "\ue0b0",
+          "properties": {
+            "threshold": 0
+          },
+          "style": "powerline",
+          "type": "executiontime"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+		  "foreground": "red",
+          "style": "plain",
+          "template": "\u2570",
+          "type": "text"
+        },
+		{
+          "background": "#1d2021",
+          "foreground": "lightCyan",
+          "leading_diamond": "\ue0b6",
+          "properties": {
+            "style": "full"
+          },
+          "style": "diamond",
+          "type": "path"
+        },
+        {
+          "background": "#282828",
+		  "foreground": "green",
+          "background_templates": [
+            "{{ if gt .Code 0 }}red{{ end }}"
+          ],
+		  "foreground_templates": [
+            "{{ if gt .Code 0 }}lightWhite{{ end }}"
+		  ],
+          "powerline_symbol": "\ue0b0",
+          "properties": {
+            "always_enabled": true
+          },
+          "style": "powerline",
+          "type": "exit"
+        }
+      ],
+      "type": "prompt"
+    }
+  ],
+  "properties": {
+    "auto_upgrade": true
+  },
+  "version": 2
+}
