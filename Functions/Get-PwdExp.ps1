@@ -1,5 +1,5 @@
-# Create the alias
-Set-Alias -Name Get-PwdExp -Value Get-UserPasswordExpiration
+
+
 
 # The function it points to
 function Get-UserPasswordExpiration {
@@ -31,3 +31,6 @@ function Get-UserPasswordExpiration {
         Write-Error "Error retrieving password information for $Username : $($_.Exception.Message)"
     }
 }
+
+# Create the alias
+Set-Alias -Name Get-PwdExp -Value Get-UserPasswordExpiration
