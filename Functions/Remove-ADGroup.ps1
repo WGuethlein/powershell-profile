@@ -67,8 +67,7 @@ function Remove-ADGroup {
             # Determine user list based on parameter set
             if ($PSCmdlet.ParameterSetName -eq 'File') {
                 # Read CSV - handles single column with or without header
-                $csvContent = Import-Csv -Path $File -ErrorAction Stop
-                $userList = $csvContent.PSObject.Properties.Value
+                $userList = Get-Content -Path $File -ErrorAction Stop | Where-Object { $_ -ne $null -and $_ -ne '' }
                 Write-Host "Processing $($userList.Count) users from '$File'" -ForegroundColor Cyan
             }
             else {
