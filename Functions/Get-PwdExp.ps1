@@ -1,6 +1,3 @@
-
-
-
 # The function it points to
 function Get-UserPasswordExpiration {
     param(
