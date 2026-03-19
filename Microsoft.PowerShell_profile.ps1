@@ -19,3 +19,38 @@ Import-Module Terminal-Icons
 Oh-My-Posh init pwsh --config "$PSScriptRoot\OMP\my.omp.json" | Invoke-Expression
 Enable-Poshtooltips
 Write-Host
+
+# Git shorthand functions
+# Wraps common git operations with shorter syntax.
+
+function push {
+    param(
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string]$Branch
+    )
+    git push origin $Branch
+}
+
+function pull {
+    param(
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string]$Branch
+    )
+    git pull origin $Branch
+}
+
+function commit {
+    param(
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string]$Message
+    )
+    git commit -m $Message
+}
+
+function add {
+    param(
+        [Parameter(Mandatory = $false, Position = 0)]
+        [string]$Path = "."
+    )
+    git add $Path
+}
