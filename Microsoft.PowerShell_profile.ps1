@@ -20,6 +20,8 @@ Oh-My-Posh init pwsh --config "$PSScriptRoot\OMP\my.omp.json" | Invoke-Expressio
 Enable-Poshtooltips
 Write-Host
 
+Set-Alias -Name tail -Value Tail-File
+
 # Git shorthand functions
 # Wraps common git operations with shorter syntax.
 
