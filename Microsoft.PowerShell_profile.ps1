@@ -56,3 +56,4 @@ function add {
     )
     git add $Path
 }
+>>>>>>> 11d3b5da3c86e9ef7249acc9a66e38390dad35d7
