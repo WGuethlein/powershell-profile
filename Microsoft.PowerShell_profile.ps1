@@ -37,7 +37,10 @@ catch { Write-Verbose "Console encoding not set: $($_.Exception.Message)" }
 if (Get-Command oh-my-posh -CommandType Application -ErrorAction SilentlyContinue) {
     $ompShell = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
     oh-my-posh init $ompShell --config "$PSScriptRoot\OMP\my.omp.json" | Invoke-Expression
-    if (Get-Command Enable-PoshTooltips -ErrorAction SilentlyContinue) { Enable-PoshTooltips }
+    # Enable-PoshTooltips is deliberately not called: it rebinds Space/Backspace to launch
+    # oh-my-posh.exe whenever the first word changes (and repaint the prompt when there is no
+    # tooltip). The theme defines no tooltips, and process launches are slow here, so it only
+    # caused lag and a blank-and-redraw while typing or holding backspace.
 
     # Wrap the oh-my-posh prompt to restore UTF-8 if a command changed the code page.
     # $? must be read first (any statement overwrites it); oh-my-posh accepts it through
