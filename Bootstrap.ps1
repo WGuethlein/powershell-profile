@@ -34,7 +34,7 @@ param(
 
 # --- Configurable defaults ---
 $defaultModules = @('ExchangeOnlineManagement', 'Microsoft.Graph.Authentication', 'Microsoft.Graph.Users', 'Terminal-Icons', 'PSFzf')
-$wingetPackages = @('JanDeDobbeleer.OhMyPosh', 'ajeetdsouza.zoxide', 'junegunn.fzf', 'Insecure.Nmap')
+$wingetPackages = @('JanDeDobbeleer.OhMyPosh', 'ajeetdsouza.zoxide', 'junegunn.fzf', 'Insecure.Nmap', 'BurntSushi.ripgrep.MSVC')
 
 $results = New-Object System.Collections.Generic.List[object]
 

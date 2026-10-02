@@ -59,6 +59,7 @@ Aliases are in parentheses. Every command has help: `Get-Help <command> -Example
 - `Invoke-ApiGet` (`get`) - Sends a GET request and returns the status code, timing, and parsed body.
 - `Invoke-ApiPost` (`post`) - Sends a POST request with a JSON body and returns the status code, timing, and parsed body.
 - `Convert-ToBase64` (`B64E`) - Base64-encodes a string.
+- `grep` - Searches files or piped output for a pattern, grep-style (`-i -r -v -n -l -c`); use `rg` (ripgrep, installed by Bootstrap) for big folders.
 
 ### Git
 

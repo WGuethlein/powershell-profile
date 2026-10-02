@@ -36,6 +36,7 @@
         'Invoke-ApiGet'
         'Invoke-ApiPost'
         'Convert-ToBase64'
+        'grep'
         'push'
         'pull'
         'commit'
