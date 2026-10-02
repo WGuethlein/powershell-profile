@@ -26,10 +26,32 @@ catch {
 # -CommandType Application keeps Get-Command from searching every module for a missing exe.
 try { Import-Module Terminal-Icons -ErrorAction Stop } catch { Write-Verbose 'Terminal-Icons not installed.' }
 
+# UTF-8 console so prompt glyphs render. Some native tools (e.g. winget) switch the console to
+# code page 437, which turns the glyphs into '?' and can confuse PSReadLine's redraw.
+try {
+    [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+    [Console]::InputEncoding  = New-Object System.Text.UTF8Encoding $false
+}
+catch { Write-Verbose "Console encoding not set: $($_.Exception.Message)" }
+
 if (Get-Command oh-my-posh -CommandType Application -ErrorAction SilentlyContinue) {
     $ompShell = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
     oh-my-posh init $ompShell --config "$PSScriptRoot\OMP\my.omp.json" | Invoke-Expression
     if (Get-Command Enable-PoshTooltips -ErrorAction SilentlyContinue) { Enable-PoshTooltips }
+
+    # Wrap the oh-my-posh prompt to restore UTF-8 if a command changed the code page.
+    # $? must be read first (any statement overwrites it); oh-my-posh accepts it through
+    # $global:NVS_ORIGINAL_LASTEXECUTIONSTATUS, so the exit-code segment stays correct.
+    $global:WyattOmpPrompt = $function:prompt
+    function global:prompt {
+        $global:NVS_ORIGINAL_LASTEXECUTIONSTATUS = $?
+        try {
+            if ([Console]::OutputEncoding.CodePage -ne 65001) { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false }
+            if ([Console]::InputEncoding.CodePage -ne 65001)  { [Console]::InputEncoding  = New-Object System.Text.UTF8Encoding $false }
+        }
+        catch { }
+        & $global:WyattOmpPrompt
+    }
 }
 
 # --- PSReadLine ---
