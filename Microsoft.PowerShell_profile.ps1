@@ -1,6 +1,6 @@
 # Microsoft.PowerShell_profile.ps1
 # Daily profile for Windows PowerShell 5.1 and PowerShell 7. Loads the WyattTools module,
-# prompt (oh-my-posh), PSReadLine tweaks, history secret filter, and optional zoxide/PSFzf.
+# prompt (oh-my-posh), PSReadLine tweaks, history secret filter, and optional PSFzf.
 # Author: WGuethlein   Date: 2026-10-02
 # Usage: dot-sourced from the real $PROFILE stub written by Bootstrap.ps1.
 
@@ -66,10 +66,7 @@ if (Get-Module PSReadLine) {
     catch { Write-Warning "History filter not set: $($_.Exception.Message)" }
 }
 
-# --- zoxide / PSFzf (silent when absent) ---
-if (Get-Command zoxide -CommandType Application -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& { (zoxide init powershell | Out-String) })
-}
+# --- PSFzf (silent when absent) ---
 try {
     Import-Module PSFzf -ErrorAction Stop
     Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'

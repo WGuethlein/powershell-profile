@@ -3,7 +3,7 @@
     Sets up (or exports the module list of) this PowerShell profile on a machine.
 .DESCRIPTION
     Default action (-Install): installs PowerShell modules for CurrentUser, winget packages
-    (oh-my-posh, zoxide, fzf), checks RSAT, creates WyattTools\config.psd1 from the example,
+    (oh-my-posh, fzf, nmap, ripgrep), checks RSAT, creates WyattTools\config.psd1 from the example,
     and writes profile stubs for both Windows PowerShell 5.1 and PowerShell 7.
     -Export writes the installed module list (Name, Version, Repository) to a CSV.
     Safe to re-run. Use -WhatIf to preview.
@@ -34,7 +34,7 @@ param(
 
 # --- Configurable defaults ---
 $defaultModules = @('ExchangeOnlineManagement', 'Microsoft.Graph.Authentication', 'Microsoft.Graph.Users', 'Terminal-Icons', 'PSFzf')
-$wingetPackages = @('JanDeDobbeleer.OhMyPosh', 'ajeetdsouza.zoxide', 'junegunn.fzf', 'Insecure.Nmap', 'BurntSushi.ripgrep.MSVC')
+$wingetPackages = @('JanDeDobbeleer.OhMyPosh', 'junegunn.fzf', 'Insecure.Nmap', 'BurntSushi.ripgrep.MSVC')
 
 $results = New-Object System.Collections.Generic.List[object]
 
