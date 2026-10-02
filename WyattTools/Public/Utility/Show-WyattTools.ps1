@@ -8,8 +8,8 @@
 .PARAMETER Detailed
     Show the synopsis and first example for every command.
 .PARAMETER Width
-    Wrap width in characters. Default 0 uses the current console width. Lists wrap between
-    command names (never mid-name), with continuation lines indented under the first name.
+    Wrap width in characters. Default 0 uses the console width, capped at 120. Lists wrap
+    between command names (never mid-name), with continuation lines indented under the first name.
 .EXAMPLE
     tools
 .EXAMPLE
@@ -41,8 +41,14 @@ function Show-WyattTools {
         # Console width; falls back to 120 when there is no real console (redirected/ISE).
         $width = $Width
         if ($width -eq 0) {
+            # Capped at 120: during profile load Windows Terminal reports the pre-resize width,
+            # which can be wider than the final tab and causes mid-word wrapping.
             $width = 120
-            try { if ($Host.UI.RawUI.WindowSize.Width -gt 0) { $width = $Host.UI.RawUI.WindowSize.Width } } catch { }
+            try {
+                $console = $Host.UI.RawUI.WindowSize.Width
+                if ($console -gt 0 -and $console -lt $width) { $width = $console }
+            }
+            catch { }
         }
 
         # Writes "Label : a, b, c" wrapping at item boundaries; continuation lines are indented

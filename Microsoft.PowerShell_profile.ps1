@@ -60,10 +60,14 @@ if (Get-Module PSReadLine) {
     Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
 
     # Prediction features need PSReadLine 2.2.0+ (not available in the 2.0.0 shipped with 5.1).
+    # Inline view from history only: ListView redraws several lines on every keystroke, which
+    # made held keys (e.g. backspace) lag and freeze. Press F2 to switch to the list view.
     if ((Get-Module PSReadLine).Version -ge [version]'2.2.0') {
-        try { Set-PSReadLineOption -PredictionSource HistoryAndPlugin -ErrorAction Stop }
-        catch { try { Set-PSReadLineOption -PredictionSource History } catch { } }
-        try { Set-PSReadLineOption -PredictionViewStyle ListView } catch { }
+        try {
+            Set-PSReadLineOption -PredictionSource History -ErrorAction Stop
+            Set-PSReadLineOption -PredictionViewStyle InlineView -ErrorAction Stop
+        }
+        catch { Write-Verbose "Prediction not configured: $($_.Exception.Message)" }
     }
 
     # Keep lines that look like they contain secrets out of the history file.
