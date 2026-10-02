@@ -1,0 +1,47 @@
+@{
+    RootModule        = 'WyattTools.psm1'
+    ModuleVersion     = '1.0.0'
+    GUID              = 'b7d1f4a2-6c3e-4e58-9a0b-2f5d8c1e7a94'
+    Author            = 'WGuethlein'
+    CompanyName       = 'WGuethlein'
+    Description       = 'Personal admin toolbox: Active Directory, Exchange, network, git and utility helpers.'
+    PowerShellVersion = '5.1'
+
+    FunctionsToExport = @(
+        'Add-ADGroupUser'
+        'Remove-ADGroupUser'
+        'Get-ADUserDepartment'
+        'Get-ADUsersByDept'
+        'Get-ADUserReport'
+        'Export-ADGroupToCSV'
+        'Get-UserPasswordExpiration'
+        'Start-ADSync'
+        'Get-ADUserInfo'
+        'Find-LockoutSource'
+        'Compare-ADUserGroups'
+        'Copy-ADGroupMembership'
+        'Get-StaleAccounts'
+        'Get-ADSyncStatus'
+        'Get-LapsPassword'
+        'Reset-LapsADPassword'
+        'Show-InboxRuleDescription'
+        'Connect-M365'
+        'Get-ExternalForwarding'
+        'Test-Port'
+        'Get-CertExpiry'
+        'Get-PublicIP'
+        'Get-RemoteSystemInfo'
+        'Show-WyattTools'
+        'Get-FileTail'
+        'Invoke-ApiGet'
+        'Invoke-ApiPost'
+        'Convert-ToBase64'
+        'push'
+        'pull'
+        'commit'
+        'add'
+    )
+    CmdletsToExport   = @()
+    VariablesToExport = @()
+    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset')
+}
