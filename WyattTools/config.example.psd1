@@ -24,6 +24,12 @@
     # Microsoft Graph delegated scopes.
     GraphScopes      = @('User.Read.All', 'Group.Read.All', 'Directory.Read.All', 'AuditLog.Read.All')
 
+    # License group -> SKU part number(s) it should grant (used by Get-GroupLicenseGap).
+    LicenseGroups    = @{
+        'LIC-Office365-E3' = 'ENTERPRISEPACK'
+        'LIC-EMS-E3'       = 'EMS'
+    }
+
     # Default export directory. Blank = current location.
     ExportDirectory  = ''
 }

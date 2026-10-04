@@ -44,6 +44,7 @@ Aliases are in parentheses. Every command has help: `Get-Help <command> -Example
 - `Connect-M365` - Connects to Microsoft Graph and Exchange Online, skipping anything already connected.
 - `Show-InboxRuleDescription` (`ibr`, `gir`) - Lists a mailbox's inbox rules with plain-English descriptions.
 - `Get-ExternalForwarding` (`extfwd`) - Finds mailboxes and inbox rules that forward mail outside the organization.
+- `Get-GroupLicenseGap` - Lists members of a license group who don't have the license that group should grant (`-ListSkus` shows license names and free seats).
 
 ### Network
 

@@ -27,6 +27,7 @@
         'Show-InboxRuleDescription'
         'Connect-M365'
         'Get-ExternalForwarding'
+        'Get-GroupLicenseGap'
         'Test-Port'
         'Get-CertExpiry'
         'Get-PublicIP'
