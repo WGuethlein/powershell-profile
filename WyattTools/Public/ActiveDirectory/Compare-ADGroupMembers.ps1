@@ -1,29 +1,40 @@
 <#
 .SYNOPSIS
-    Lists users who are in one AD group but not in another.
+    Lists AD group members, combined with other groups using -Or, -And and -Not.
 .DESCRIPTION
-    Returns every user in -Group who is not in any of the -Not groups. Nested membership counts
-    on both sides by default (a user in a group inside the group is a member); use -DirectOnly
-    to compare direct members only. Groups are matched by name or SamAccountName. Users are
-    found with an LDAP memberOf query, so large groups (over the 5000-member
+    Starts with the users in -Group plus any -Or groups, keeps only users who are also in every
+    -And group, then drops users in any -Not group. With none of those, it lists -Group's users.
+    Nested membership counts by default (a user in a group inside the group is a member); use
+    -DirectOnly to use direct members only. Groups are matched by name or SamAccountName. Users
+    are found with an LDAP memberOf query, so large groups (over the 5000-member
     Get-ADGroupMember limit) work and no per-user lookups are needed.
 .PARAMETER Group
-    The group whose members you want to check.
+    The starting group.
 .PARAMETER Not
-    One or more groups to exclude: a user in any of them is left out of the results.
+    Groups to exclude: a user in any of them is left out of the results.
+.PARAMETER And
+    Groups the user must also be in (all of them).
+.PARAMETER Or
+    Groups whose users are added to -Group's users.
 .PARAMETER DirectOnly
-    Compare direct members only instead of including nested groups.
+    Use direct members only instead of including nested groups.
 .PARAMETER Export
     Write results to GroupCompare_yyyyMMdd_HHmm.csv in the configured export directory.
 .EXAMPLE
     Compare-ADGroupMembers -Group 'VPN-Users' -Not 'MFA-Enrolled'
+    Users in VPN-Users who are not in MFA-Enrolled.
 .EXAMPLE
-    Compare-ADGroupMembers 'Staff' 'Office-A', 'Office-B' -Export
+    Compare-ADGroupMembers -Group 'App-Users' -And 'Remote-Staff'
+    Users in both groups.
 .EXAMPLE
-    Compare-ADGroupMembers -Group 'App-Users' -Not 'App-Admins' -DirectOnly | Where-Object Enabled
+    Compare-ADGroupMembers -Group 'Office-A' -Or 'Office-B' -Not 'Laptop-Users' -Export
+    Users in Office-A or Office-B who are not in Laptop-Users, saved to CSV.
+.EXAMPLE
+    Compare-ADGroupMembers 'Staff' 'Office-A', 'Office-B'
+    Positional form: users in Staff who are in neither Office-A nor Office-B.
 .NOTES
     Name: Compare-ADGroupMembers
-    Version: 1.0.0
+    Version: 1.1.0
     Author: WGuethlein
     Date: 2026-10-04
     Prerequisites: ActiveDirectory module
@@ -35,9 +46,12 @@ function Compare-ADGroupMembers {
         [ValidateNotNullOrEmpty()]
         [string]$Group,
 
-        [Parameter(Mandatory, Position = 1)]
-        [ValidateNotNullOrEmpty()]
+        [Parameter(Position = 1)]
         [string[]]$Not,
+
+        [string[]]$And,
+
+        [string[]]$Or,
 
         [switch]$DirectOnly,
 
@@ -69,21 +83,52 @@ function Compare-ADGroupMembers {
         Get-ADUser -LDAPFilter "(memberOf$rule=$dn)" -Properties DisplayName, Department -ErrorAction Stop
     }
 
-    $source = & $resolveGroup $Group
-    if ($null -eq $source) { return }
-    $excludeGroups = foreach ($name in $Not) { & $resolveGroup $name }
-    $excludeGroups = @($excludeGroups | Where-Object { $_ })
-    if ($excludeGroups.Count -ne $Not.Count) { return }
-
-    $members = @(& $getUsers $source)
-
-    # DNs of everyone in any -Not group, for a fast case-insensitive lookup.
-    $excluded = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
-    foreach ($g in $excludeGroups) {
-        foreach ($u in @(& $getUsers $g)) { $null = $excluded.Add($u.DistinguishedName) }
+    # Resolves a list of names; returns $null if any of them fails so the run stops.
+    $resolveAll = {
+        param([string[]]$Names)
+        $groups = @(foreach ($n in @($Names | Where-Object { $_ })) { & $resolveGroup $n })
+        $groups = @($groups | Where-Object { $_ })
+        if ($groups.Count -ne @($Names | Where-Object { $_ }).Count) { return $null }
+        , $groups
     }
 
-    $results = @($members | Where-Object { -not $excluded.Contains($_.DistinguishedName) } | Sort-Object DisplayName | ForEach-Object {
+    # Case-insensitive set of the DNs of every user in the given groups.
+    $dnSet = {
+        param($Groups)
+        $set = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+        foreach ($g in $Groups) {
+            foreach ($u in @(& $getUsers $g)) { $null = $set.Add($u.DistinguishedName) }
+        }
+        , $set
+    }
+
+    $source = & $resolveGroup $Group
+    if ($null -eq $source) { return }
+    $orGroups = & $resolveAll $Or
+    $andGroups = & $resolveAll $And
+    $notGroups = & $resolveAll $Not
+    if ($null -eq $orGroups -or $null -eq $andGroups -or $null -eq $notGroups) { return }
+
+    # -Group plus -Or groups, de-duplicated by DN.
+    $users = @{}
+    foreach ($g in @($source) + $orGroups) {
+        foreach ($u in @(& $getUsers $g)) { $users[$u.DistinguishedName] = $u }
+    }
+    $candidates = @($users.Values)
+
+    # -And: must be in every one of these groups.
+    foreach ($g in $andGroups) {
+        $inGroup = & $dnSet @(, $g)
+        $candidates = @($candidates | Where-Object { $inGroup.Contains($_.DistinguishedName) })
+    }
+
+    # -Not: drop anyone in any of these groups.
+    if ($notGroups.Count -gt 0) {
+        $excluded = & $dnSet $notGroups
+        $candidates = @($candidates | Where-Object { -not $excluded.Contains($_.DistinguishedName) })
+    }
+
+    $results = @($candidates | Sort-Object DisplayName | ForEach-Object {
             [pscustomobject]@{
                 Name              = $_.DisplayName
                 SamAccountName    = $_.SamAccountName
@@ -93,9 +138,13 @@ function Compare-ADGroupMembers {
             }
         })
 
+    # Summary, e.g. "Office-A or Office-B, and in Staff, not in Laptops: 12 users (including nested)"
+    $desc = (@($source.Name) + @($orGroups | ForEach-Object { $_.Name })) -join ' or '
+    if ($andGroups.Count -gt 0) { $desc += ', and in ' + (@($andGroups | ForEach-Object { $_.Name }) -join ' and ') }
+    if ($notGroups.Count -gt 0) { $desc += ', not in ' + (@($notGroups | ForEach-Object { $_.Name }) -join ' or ') }
     $scope = 'including nested'
     if ($DirectOnly) { $scope = 'direct only' }
-    Write-Host "$($source.Name): $($members.Count) users ($scope). Not in $($excludeGroups.Name -join ', '): $($results.Count)" -ForegroundColor Cyan
+    Write-Host "${desc}: $($results.Count) users ($scope)" -ForegroundColor Cyan
 
     if ($Export) {
         $path = Join-Path (Get-ExportDirectory) ('GroupCompare_{0}.csv' -f (Get-Date -Format 'yyyyMMdd_HHmm'))
