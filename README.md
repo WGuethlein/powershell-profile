@@ -72,7 +72,7 @@ Aliases are in parentheses. Every command has help: `Get-Help <command> -Example
 ### Repo scripts
 
 - `Bootstrap.ps1` - Installs the modules and tools this profile uses and adds the profile to both PowerShell versions.
-- `Microsoft.PowerShell_profile.ps1` - Loads WyattTools, the prompt, and PSReadLine settings when a shell starts.
+- `Microsoft.PowerShell_profile.ps1` - Loads WyattTools, the prompt, PSReadLine settings, and the `table` alias (`Format-Table`) when a shell starts.
 
 ## Adding a function
 
