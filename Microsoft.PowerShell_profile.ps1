@@ -21,9 +21,6 @@ catch {
     Write-Warning "WyattTools not loaded: $($_.Exception.Message)"
 }
 
-# --- Aliases for built-in cmdlets ---
-Set-Alias -Name table -Value Format-Table
-
 # --- Optional modules / prompt ---
 # Startup speed: try/catch Import-Module beats Get-Module -ListAvailable (full module scan), and
 # -CommandType Application keeps Get-Command from searching every module for a missing exe.

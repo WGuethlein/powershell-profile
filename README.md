@@ -72,12 +72,26 @@ Aliases are in parentheses. Every command has help: `Get-Help <command> -Example
 ### Repo scripts
 
 - `Bootstrap.ps1` - Installs the modules and tools this profile uses and adds the profile to both PowerShell versions.
-- `Microsoft.PowerShell_profile.ps1` - Loads WyattTools, the prompt, PSReadLine settings, and the `table` alias (`Format-Table`) when a shell starts.
+- `Microsoft.PowerShell_profile.ps1` - Loads WyattTools, the prompt, and PSReadLine settings when a shell starts.
+
+### Shortcuts
+
+Aliases for commands that aren't WyattTools functions, defined in `WyattTools\Aliases.psd1`
+and listed by `tools` under Shortcuts.
+
+- `table` - `Format-Table`
 
 ## Adding a function
 
 1. Drop a `.ps1` in `WyattTools\Public\<Category>\`.
 2. Add the function name to `FunctionsToExport` in `WyattTools.psd1`.
+
+## Adding an alias
+
+- For a WyattTools function: put `Set-Alias` at the bottom of the function's file.
+- For anything else (built-in cmdlets, external tools): add it under a category in `WyattTools\Aliases.psd1`.
+
+Either way, also add the alias to `AliasesToExport` in `WyattTools.psd1`.
 
 ## sudo
 

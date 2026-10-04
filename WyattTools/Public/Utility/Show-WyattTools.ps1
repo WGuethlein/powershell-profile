@@ -86,6 +86,11 @@ function Show-WyattTools {
         if ($aliases.Count -gt 0) {
             & $writeWrapped 'Aliases' $aliases 'Yellow' 'Gray'
         }
+        # Aliases.psd1 entries, shown as "alias (Command)".
+        $extra = @($script:WyattExtraAliases | Sort-Object { $_.Name } | ForEach-Object { "$($_.Name) ($($_.Command))" })
+        if ($extra.Count -gt 0) {
+            & $writeWrapped 'Shortcuts' $extra 'Yellow' 'Gray'
+        }
         return
     }
 
@@ -103,6 +108,15 @@ function Show-WyattTools {
                 $ex = @($help.Examples.Example)[0]
                 Write-Host ("  e.g. " + $ex.Code) -ForegroundColor Yellow
             }
+        }
+    }
+
+    # Aliases.psd1 entries, grouped by their category.
+    foreach ($group in ($script:WyattExtraAliases | Group-Object { $_.Category } | Sort-Object Name)) {
+        Write-Host "`n[Shortcuts: $($group.Name)]" -ForegroundColor Cyan
+        foreach ($entry in ($group.Group | Sort-Object { $_.Name })) {
+            Write-Host $entry.Name -ForegroundColor Green -NoNewline
+            Write-Host "  -> $($entry.Command)" -ForegroundColor White
         }
     }
 }

@@ -34,4 +34,25 @@ foreach ($alias in @(Get-Alias | Where-Object { $publicNames -contains $_.Defini
     $aliasNames.Add($alias.Name)
 }
 
+# Aliases for commands outside this module, from Aliases.psd1 (category -> alias -> command).
+$script:WyattExtraAliases = New-Object 'System.Collections.Generic.List[hashtable]'
+$aliasFile = Join-Path $PSScriptRoot 'Aliases.psd1'
+if (Test-Path -LiteralPath $aliasFile) {
+    try {
+        $aliasData = Import-PowerShellDataFile -Path $aliasFile
+        foreach ($category in $aliasData.Keys) {
+            foreach ($name in $aliasData[$category].Keys) {
+                Set-Alias -Name $name -Value $aliasData[$category][$name]
+                $script:WyattExtraAliases.Add(@{
+                    Name     = $name
+                    Command  = $aliasData[$category][$name]
+                    Category = $category
+                })
+                $aliasNames.Add($name)
+            }
+        }
+    }
+    catch { Write-Warning "WyattTools: failed to load $($aliasFile): $($_.Exception.Message)" }
+}
+
 Export-ModuleMember -Function $publicNames -Alias $aliasNames.ToArray()
