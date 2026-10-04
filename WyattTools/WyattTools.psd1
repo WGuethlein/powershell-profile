@@ -18,7 +18,7 @@
         'Start-ADSync'
         'Get-ADUserInfo'
         'Find-LockoutSource'
-        'Compare-ADUserGroups'
+        'Compare-ADGroupMembers'
         'Copy-ADGroupMembership'
         'Get-StaleAccounts'
         'Get-ADSyncStatus'

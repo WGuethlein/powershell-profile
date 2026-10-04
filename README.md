@@ -25,7 +25,7 @@ Aliases are in parentheses. Every command has help: `Get-Help <command> -Example
 - `Add-ADGroupUser` - Adds one user or a CSV of users to an AD group, skipping anyone already a direct member.
 - `Remove-ADGroupUser` - Removes one user or a CSV of users from an AD group, only if they are a direct member.
 - `Copy-ADGroupMembership` - Adds a target user to every group a source user is directly in (never removes anything).
-- `Compare-ADUserGroups` - Shows which groups two users share and which only one of them has.
+- `Compare-ADGroupMembers` - Lists users in one group who are not in another (`-Not`, nested members included unless `-DirectOnly`).
 - `Export-ADGroupToCSV` - Exports the members of one or more matching AD groups to a CSV.
 - `Get-ADUserInfo` (`adinfo`) - Shows one user's account status, password dates, last logon, manager, and groups.
 - `Get-ADUserDepartment` - Looks up the department for one user or a CSV of users.
