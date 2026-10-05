@@ -21,6 +21,7 @@
         'Copy-ADGroupMembership'
         'Get-StaleAccounts'
         'Get-ADSyncStatus'
+        'Get-ConnectedDC'
         'Get-LapsPassword'
         'Reset-LapsADPassword'
         'Show-InboxRuleDescription'
@@ -46,5 +47,5 @@
     )
     CmdletsToExport   = @()
     VariablesToExport = @()
-    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset', 'm365info', 'table')
+    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset', 'm365info', 'table', 'mydc')
 }

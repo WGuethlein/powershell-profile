@@ -37,6 +37,7 @@ Aliases are in parentheses. Every command has help: `Get-Help <command> -Example
 - `Reset-LapsADPassword` (`lapsreset`) - Expires a computer's LAPS password so the device rotates it at its next policy check.
 - `Start-ADSync` - Starts an Entra Connect delta sync on the sync server.
 - `Get-ADSyncStatus` - Shows the Entra Connect scheduler state and the results of the most recent sync runs.
+- `Get-ConnectedDC` (`mydc`) - Shows which domain controller you're on: logon server, secure-channel DC, and the DC the locator returns (with IP and site).
 
 ### Exchange / Microsoft 365
 
