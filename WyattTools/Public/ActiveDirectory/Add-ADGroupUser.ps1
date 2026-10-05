@@ -4,7 +4,9 @@
 .DESCRIPTION
     Resolves each identifier (email, UPN, or SamAccountName) to an AD user and adds the user to
     the group. Only DIRECT membership is considered: users who are already direct members are
-    skipped. Direct member DNs are fetched once up front. A transcript is written to %TEMP%.
+    skipped. Direct member DNs are fetched once up front. A transcript is written to %TEMP% and is
+    always stopped, even if the run fails. Pipeline input is collected first and processed once
+    the pipeline completes.
 .PARAMETER File
     Path to a text/CSV file with one identifier per line (header row and blank lines are skipped).
 .PARAMETER User
@@ -19,9 +21,9 @@
     Get-Content .\users.txt | Add-ADGroupUser -Group "Sales Team"
 .NOTES
     Name: Add-ADGroupUser
-    Version: 2.0.0
+    Version: 2.1.0
     Author: WGuethlein
-    Date: 2026-10-02
+    Date: 2026-10-04
     Prerequisites: ActiveDirectory module, rights to modify the group
 #>
 function Add-ADGroupUser {
@@ -42,7 +44,18 @@ function Add-ADGroupUser {
 
     begin {
         Assert-Module -Name ActiveDirectory
+        $pipelineUsers = New-Object 'System.Collections.Generic.List[string]'
+    }
 
+    # Only collect input here; all work happens in end{} so one try/finally can guarantee
+    # Stop-Transcript runs even after a terminating error.
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'SingleUser') {
+            foreach ($u in $User) { $pipelineUsers.Add($u) }
+        }
+    }
+
+    end {
         try {
             $adGroup = Get-ADGroup -Identity $Group -Properties Members -ErrorAction Stop
             Write-Verbose "Target group: $($adGroup.Name) ($($adGroup.DistinguishedName))"
@@ -58,60 +71,60 @@ function Add-ADGroupUser {
         $transcriptPath = Join-Path $env:TEMP "Add-ADGroupUser_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
         Start-Transcript -Path $transcriptPath -WhatIf:$false | Out-Null
 
-        $successCount = 0
-        $failCount = 0
-        $notFoundCount = 0
-        $alreadyMemberCount = 0
-        Write-Host "Adding to group: $($adGroup.Name)" -ForegroundColor Cyan
-    }
+        try {
+            $successCount = 0
+            $failCount = 0
+            $notFoundCount = 0
+            $alreadyMemberCount = 0
+            Write-Host "Adding to group: $($adGroup.Name)" -ForegroundColor Cyan
 
-    process {
-        if ($PSCmdlet.ParameterSetName -eq 'File') {
-            $resolved = @(Resolve-ADUserIdentity -File $File)
-            Write-Host "Processing $($resolved.Count) users from '$File'" -ForegroundColor Cyan
-        }
-        else {
-            $resolved = @(Resolve-ADUserIdentity -User $User)
-        }
-
-        foreach ($item in $resolved) {
-            if ($null -eq $item.ADUser) {
-                Write-Warning "User not found: $($item.Input) ($($item.Error))"
-                $notFoundCount++
-                continue
+            if ($PSCmdlet.ParameterSetName -eq 'File') {
+                $resolved = @(Resolve-ADUserIdentity -File $File)
+                Write-Host "Processing $($resolved.Count) users from '$File'" -ForegroundColor Cyan
             }
-            $adUser = $item.ADUser
-
-            if ($memberDns.Contains($adUser.DistinguishedName)) {
-                Write-Verbose "Already a direct member (skipping): $($item.Input) ($($adUser.SamAccountName))"
-                $alreadyMemberCount++
-                continue
+            else {
+                $resolved = @(Resolve-ADUserIdentity -User $pipelineUsers.ToArray())
             }
 
-            if ($PSCmdlet.ShouldProcess("$($item.Input) ($($adUser.SamAccountName))", "Add to $($adGroup.Name)")) {
-                try {
-                    Add-ADGroupMember -Identity $adGroup -Members $adUser -ErrorAction Stop
-                    [void]$memberDns.Add($adUser.DistinguishedName)
-                    Write-Host "Added: $($item.Input) ($($adUser.SamAccountName))" -ForegroundColor Green
-                    $successCount++
+            foreach ($item in $resolved) {
+                if ($null -eq $item.ADUser) {
+                    Write-Warning "User not found: $($item.Input) ($($item.Error))"
+                    $notFoundCount++
+                    continue
                 }
-                catch {
-                    Write-Error "Failed to add $($item.Input): $_"
-                    $failCount++
+                $adUser = $item.ADUser
+
+                if ($memberDns.Contains($adUser.DistinguishedName)) {
+                    Write-Verbose "Already a direct member (skipping): $($item.Input) ($($adUser.SamAccountName))"
+                    $alreadyMemberCount++
+                    continue
+                }
+
+                if ($PSCmdlet.ShouldProcess("$($item.Input) ($($adUser.SamAccountName))", "Add to $($adGroup.Name)")) {
+                    try {
+                        Add-ADGroupMember -Identity $adGroup -Members $adUser -ErrorAction Stop
+                        [void]$memberDns.Add($adUser.DistinguishedName)
+                        Write-Host "Added: $($item.Input) ($($adUser.SamAccountName))" -ForegroundColor Green
+                        $successCount++
+                    }
+                    catch {
+                        Write-Error "Failed to add $($item.Input): $_"
+                        $failCount++
+                    }
                 }
             }
-        }
-    }
 
-    end {
-        Write-Host ""
-        Write-Host "========== Summary ==========" -ForegroundColor Cyan
-        Write-Host "Successfully added: $successCount" -ForegroundColor Green
-        Write-Host "Failed: $failCount" -ForegroundColor Red
-        Write-Host "Not found in AD: $notFoundCount" -ForegroundColor Yellow
-        Write-Host "Already members: $alreadyMemberCount" -ForegroundColor Gray
-        Write-Host "Transcript: $transcriptPath" -ForegroundColor Cyan
-        $WhatIfPreference = $false  # Stop-Transcript has no -WhatIf in 5.1; must really stop
-        Stop-Transcript | Out-Null
+            Write-Host ""
+            Write-Host "========== Summary ==========" -ForegroundColor Cyan
+            Write-Host "Successfully added: $successCount" -ForegroundColor Green
+            Write-Host "Failed: $failCount" -ForegroundColor Red
+            Write-Host "Not found in AD: $notFoundCount" -ForegroundColor Yellow
+            Write-Host "Already members: $alreadyMemberCount" -ForegroundColor Gray
+            Write-Host "Transcript: $transcriptPath" -ForegroundColor Cyan
+        }
+        finally {
+            $WhatIfPreference = $false  # Stop-Transcript has no -WhatIf in 5.1; must really stop
+            Stop-Transcript | Out-Null
+        }
     }
 }

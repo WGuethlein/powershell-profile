@@ -34,7 +34,7 @@
     Positional form: users in Staff who are in neither Office-A nor Office-B.
 .NOTES
     Name: Compare-ADGroupMembers
-    Version: 1.1.0
+    Version: 1.2.0
     Author: WGuethlein
     Date: 2026-10-04
     Prerequisites: ActiveDirectory module
@@ -148,7 +148,7 @@ function Compare-ADGroupMembers {
 
     if ($Export) {
         $path = Join-Path (Get-ExportDirectory) ('GroupCompare_{0}.csv' -f (Get-Date -Format 'yyyyMMdd_HHmm'))
-        $results | Export-Csv -Path $path -NoTypeInformation
+        $results | Export-Csv -Path $path -NoTypeInformation -Encoding UTF8
         Write-Host "Exported to $path" -ForegroundColor Cyan
     }
 

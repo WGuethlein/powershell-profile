@@ -3,7 +3,7 @@
     Finds mailboxes that forward mail to external addresses.
 .DESCRIPTION
     Checks mailbox-level forwarding (ForwardingSmtpAddress, ForwardingAddress) and, unless
-    -SkipInboxRules is used, inbox rules (enabled and disabled) with ForwardTo, RedirectTo or
+    -SkipInboxRules is used, inbox rules (enabled, disabled and hidden) with ForwardTo, RedirectTo or
     ForwardAsAttachmentTo actions. A target is external when its domain is not an accepted domain
     of the tenant. Legacy DN (EX:) targets are internal. By default only external forwards are
     returned. Connects to Exchange Online if needed.
@@ -23,9 +23,9 @@
     Get-ExternalForwarding -Export
 .NOTES
     Name: Get-ExternalForwarding
-    Version: 1.0.0
+    Version: 1.1.0
     Author: WGuethlein
-    Date: 2026-10-02
+    Date: 2026-10-04
     Prerequisites: ExchangeOnlineManagement module (EXO V3)
 #>
 function Get-ExternalForwarding {
@@ -115,13 +115,23 @@ function Get-ExternalForwarding {
 
             # (b) ForwardingAddress is a recipient identity; resolve it (may be a contact or mail user)
             if ($mbx.ForwardingAddress) {
-                $rcpt = Get-EXORecipient -Identity ([string]$mbx.ForwardingAddress) -ErrorAction Stop
-                & $addResult $mbx 'MailboxForwardingAddress' $null $null 'Forward' ([string]$rcpt.PrimarySmtpAddress)
+                # Own try/catch so a lookup failure does not skip this mailbox's inbox-rule scan;
+                # fall back to the raw value so the forward is still recorded.
+                $fwdTarget = [string]$mbx.ForwardingAddress
+                try {
+                    $rcpt = Get-EXORecipient -Identity $fwdTarget -ErrorAction Stop
+                    $fwdTarget = [string]$rcpt.PrimarySmtpAddress
+                }
+                catch {
+                    Write-Warning "Could not resolve ForwardingAddress '$fwdTarget' on '$($mbx.PrimarySmtpAddress)': $($_.Exception.Message)"
+                }
+                & $addResult $mbx 'MailboxForwardingAddress' $null $null 'Forward' $fwdTarget
             }
 
-            # (c) Inbox rules, enabled and disabled
+            # (c) Inbox rules, enabled and disabled. -IncludeHidden also returns hidden rules,
+            # a known attacker technique for concealing forwarding.
             if (-not $SkipInboxRules) {
-                foreach ($rule in @(Get-InboxRule -Mailbox ([string]$mbx.PrimarySmtpAddress) -ErrorAction Stop)) {
+                foreach ($rule in @(Get-InboxRule -Mailbox ([string]$mbx.PrimarySmtpAddress) -IncludeHidden -ErrorAction Stop)) {
                     foreach ($action in 'ForwardTo', 'RedirectTo', 'ForwardAsAttachmentTo') {
                         foreach ($entry in @($rule.$action)) {
                             if ($null -eq $entry -or "$entry" -eq '') { continue }
@@ -146,7 +156,7 @@ function Get-ExternalForwarding {
 
     if ($Export) {
         $path = Join-Path (Get-ExportDirectory) ('ExternalForwarding_{0}.csv' -f (Get-Date -Format 'yyyyMMdd_HHmm'))
-        $results | Export-Csv -Path $path -NoTypeInformation
+        $results | Export-Csv -Path $path -NoTypeInformation -Encoding UTF8
         Write-Host "Exported to $path" -ForegroundColor Cyan
     }
 

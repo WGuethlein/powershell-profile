@@ -26,12 +26,11 @@ Aliases are in parentheses. Every command has help: `Get-Help <command> -Example
 - `Remove-ADGroupUser` - Removes one user or a CSV of users from an AD group, only if they are a direct member.
 - `Copy-ADGroupMembership` - Adds a target user to every group a source user is directly in (never removes anything).
 - `Compare-ADGroupMembers` - Lists a group's users, combined with other groups via `-Or` (either), `-And` (both) and `-Not` (exclude). Nested members count unless `-DirectOnly`.
-- `Export-ADGroupToCSV` - Exports the members of one or more matching AD groups to a CSV.
 - `Get-ADUserInfo` (`adinfo`) - Shows one user's account status, password dates, last logon, manager, and groups.
 - `Get-ADUserDepartment` - Looks up the department for one user or a CSV of users.
-- `Get-ADUsersByDept` - Exports all enabled users in a department (wildcards allowed) to a CSV.
-- `Get-ADUserReport` - Exports users from one of the configured OUs (Active, Departed, CR, India) to a CSV.
-- `Get-UserPasswordExpiration` (`Get-PwdExp`) - Shows when a user's password expires, honoring fine-grained password policies.
+- `Get-ADUsersByDept` - Lists all enabled users in a department (wildcards allowed); `-Export` saves a CSV.
+- `Get-ADUserReport` - Lists users from one of the configured OUs (Active, Departed, CR, India); `-Export` saves a CSV.
+- `Get-UserPasswordExpiration` (`Get-PwdExp`) - Shows when a user's password expires (by username, UPN, or email), honoring fine-grained password policies.
 - `Get-StaleAccounts` - Lists enabled users and computers that haven't logged on in a set number of days (default 90).
 - `Find-LockoutSource` - Finds which computer locked out an account by reading lockout events on the PDC.
 - `Get-LapsPassword` (`laps`) - Copies a computer's LAPS admin password to the clipboard and clears it after 30 seconds.
@@ -43,8 +42,10 @@ Aliases are in parentheses. Every command has help: `Get-Help <command> -Example
 
 - `Connect-M365` - Connects to Microsoft Graph and Exchange Online, skipping anything already connected.
 - `Show-InboxRuleDescription` (`ibr`, `gir`) - Lists a mailbox's inbox rules with plain-English descriptions.
-- `Get-ExternalForwarding` (`extfwd`) - Finds mailboxes and inbox rules that forward mail outside the organization.
-- `Get-GroupLicenseGap` - Lists members of a license group who don't have the license that group should grant (`-ListSkus` shows license names and free seats).
+- `Get-ExternalForwarding` (`extfwd`) - Finds mailboxes and inbox rules (including hidden ones) that forward mail outside the organization.
+- `Get-GroupLicenseGap` - Lists members of a license group who don't have the license that group should grant (`-ListSkus` shows license names and free seats; `-ExcludeDisabled` skips disabled accounts).
+- `Get-LicenseReclaim` - Lists licensed users who are disabled, haven't signed in for 90 days (`-Days`), or never signed in, so their licenses can be freed up.
+- `Get-M365UserInfo` (`m365info`) - Shows one user's Microsoft 365 account: licenses (and which group assigned them, with any errors), last sign-in, MFA methods, and with `-Mailbox` the mailbox type and forwarding.
 
 ### Network
 

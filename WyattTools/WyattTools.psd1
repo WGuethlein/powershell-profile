@@ -13,7 +13,6 @@
         'Get-ADUserDepartment'
         'Get-ADUsersByDept'
         'Get-ADUserReport'
-        'Export-ADGroupToCSV'
         'Get-UserPasswordExpiration'
         'Start-ADSync'
         'Get-ADUserInfo'
@@ -28,6 +27,8 @@
         'Connect-M365'
         'Get-ExternalForwarding'
         'Get-GroupLicenseGap'
+        'Get-LicenseReclaim'
+        'Get-M365UserInfo'
         'Test-Port'
         'Get-CertExpiry'
         'Get-PublicIP'
@@ -45,5 +46,5 @@
     )
     CmdletsToExport   = @()
     VariablesToExport = @()
-    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset', 'table')
+    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset', 'm365info', 'table')
 }

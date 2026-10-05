@@ -1,25 +1,26 @@
 <#
 .SYNOPSIS
-    Exports AD users from a selected OU with chosen attributes to console and CSV.
+    Returns AD users from a selected OU with chosen attributes, optionally exporting a CSV.
 .DESCRIPTION
     Queries one of the configured OUs (Active, Departed, CR, India) at immediate-child scope,
-    resolves the Manager attribute to a SamAccountName, prints the results, and exports a CSV.
-    OU distinguished names come from the WyattTools config (OUs key).
+    resolves the Manager attribute to a SamAccountName, and returns one object per user.
+    With -Export the same rows are also written to a CSV. OU distinguished names come from the
+    WyattTools config (OUs key).
 .PARAMETER Ou
     Which configured OU to query: Active, Departed, CR, or India.
 .PARAMETER Properties
     Attributes to return. Manager is resolved to SamAccountName.
-.PARAMETER OutputDirectory
-    CSV output directory. Default: ExportDirectory from config, or the current location.
+.PARAMETER Export
+    Write results to ADUserReport_<Ou>_yyyyMMdd_HHmm.csv in the configured export directory.
 .EXAMPLE
-    Get-ADUserReport -Ou Active
+    Get-ADUserReport -Ou Active | Format-Table
 .EXAMPLE
-    Get-ADUserReport -Ou Departed -Properties SamAccountName,Manager
+    Get-ADUserReport -Ou Departed -Properties SamAccountName,Manager -Export
 .NOTES
     Name: Get-ADUserReport
-    Version: 2.0.0
+    Version: 2.1.0
     Author: WGuethlein
-    Date: 2026-10-02
+    Date: 2026-10-04
     Prerequisites: ActiveDirectory module (RSAT), rights to read AD
 #>
 function Get-ADUserReport {
@@ -36,7 +37,7 @@ function Get-ADUserReport {
         ),
 
         [Parameter()]
-        [string]$OutputDirectory
+        [switch]$Export
     )
 
     Assert-Module -Name ActiveDirectory
@@ -44,17 +45,16 @@ function Get-ADUserReport {
     $searchBase = (Get-WyattConfig).OUs[$Ou]
     if (-not $searchBase) { throw "No DN configured for OU '$Ou' (config key OUs.$Ou)." }
 
-    if (-not $OutputDirectory) { $OutputDirectory = Get-ExportDirectory }
-    if (-not (Test-Path -Path $OutputDirectory)) {
-        throw "Output directory does not exist: $OutputDirectory"
-    }
-
     # OneLevel = immediate children only. SamAccountName/Name/Enabled are returned by default.
-    $adProperties = $Properties | Where-Object { $_ -ne 'SamAccountName' -and $_ -ne 'Enabled' -and $_ -ne 'Name' }
+    $adProperties = @($Properties | Where-Object { $_ -ne 'SamAccountName' -and $_ -ne 'Enabled' -and $_ -ne 'Name' })
+
+    # -Properties throws on an empty list, so only pass it when there is something to request.
+    $propArgs = @{}
+    if ($adProperties.Count -gt 0) { $propArgs['Properties'] = $adProperties }
 
     try {
         Write-Verbose "Querying $searchBase (OneLevel scope)."
-        $users = Get-ADUser -SearchBase $searchBase -SearchScope OneLevel -Filter * -Properties $adProperties -ErrorAction Stop
+        $users = Get-ADUser -SearchBase $searchBase -SearchScope OneLevel -Filter * @propArgs -ErrorAction Stop
     }
     catch {
         throw "AD query failed for '$Ou' ($searchBase): $($_.Exception.Message)"
@@ -95,14 +95,11 @@ function Get-ADUserReport {
         [PSCustomObject]$row
     }
 
-    $report | Format-Table -AutoSize | Out-Host
+    if ($Export) {
+        $path = Join-Path (Get-ExportDirectory) ('ADUserReport_{0}_{1}.csv' -f $Ou, (Get-Date -Format 'yyyyMMdd_HHmm'))
+        $report | Export-Csv -Path $path -NoTypeInformation -Encoding UTF8
+        Write-Host "Exported to $path" -ForegroundColor Cyan
+    }
 
-    $csvPath = Join-Path $OutputDirectory "ADUserReport_${Ou}_$(Get-Date -Format 'yyyyMMdd').csv"
-    try {
-        $report | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8 -ErrorAction Stop
-        Write-Host "Exported $(@($report).Count) users to $csvPath" -ForegroundColor Green
-    }
-    catch {
-        throw "CSV export failed to '$csvPath': $($_.Exception.Message)"
-    }
+    $report
 }

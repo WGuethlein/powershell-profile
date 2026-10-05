@@ -21,8 +21,13 @@
     List the tenant's SKU part numbers with total, used and free seats, then stop.
 .PARAMETER Export
     Write results to LicenseGap_yyyyMMdd_HHmm.csv in the configured export directory.
+.PARAMETER ExcludeDisabled
+    Leave out users whose account is disabled (accountEnabled is false). They are dropped before
+    counting, so Members, Licensed and Missing in the summary all count only the remaining users.
 .EXAMPLE
     Get-GroupLicenseGap -Export
+.EXAMPLE
+    Get-GroupLicenseGap -ExcludeDisabled
 .EXAMPLE
     Get-GroupLicenseGap -GroupName 'LIC-Visio' -SkuPartNumber 'VISIOCLIENT'
 .EXAMPLE
@@ -31,7 +36,7 @@
     Get-GroupLicenseGap -ListSkus
 .NOTES
     Name: Get-GroupLicenseGap
-    Version: 1.0.0
+    Version: 1.1.0
     Author: WGuethlein
     Date: 2026-10-04
     Prerequisites: Microsoft.Graph.Authentication module
@@ -55,7 +60,11 @@ function Get-GroupLicenseGap {
 
         [Parameter(ParameterSetName = 'Single')]
         [Parameter(ParameterSetName = 'Map')]
-        [switch]$Export
+        [switch]$Export,
+
+        [Parameter(ParameterSetName = 'Single')]
+        [Parameter(ParameterSetName = 'Map')]
+        [switch]$ExcludeDisabled
     )
 
     $null = Connect-M365 -Graph
@@ -128,6 +137,8 @@ function Get-GroupLicenseGap {
         $select = 'id,displayName,userPrincipalName,accountEnabled,assignedLicenses,licenseAssignmentStates'
         $uri = "https://graph.microsoft.com/v1.0/groups/$($groups[0].id)/transitiveMembers/microsoft.graph.user?`$count=true&`$top=999&`$select=$select"
         $members = @(& $getAll $uri)
+        # Drop disabled accounts up front so Members, Licensed and Missing stay consistent.
+        if ($ExcludeDisabled) { $members = @($members | Where-Object { $_.accountEnabled -ne $false }) }
 
         $missingCount = 0
         foreach ($user in $members) {
@@ -173,7 +184,7 @@ function Get-GroupLicenseGap {
 
     if ($Export) {
         $path = Join-Path (Get-ExportDirectory) ('LicenseGap_{0}.csv' -f (Get-Date -Format 'yyyyMMdd_HHmm'))
-        $results | Export-Csv -Path $path -NoTypeInformation
+        $results | Export-Csv -Path $path -NoTypeInformation -Encoding UTF8
         Write-Host "Exported to $path" -ForegroundColor Cyan
     }
 

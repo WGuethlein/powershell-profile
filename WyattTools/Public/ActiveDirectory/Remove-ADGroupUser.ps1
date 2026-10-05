@@ -5,7 +5,9 @@
     Resolves each identifier (email, UPN, or SamAccountName) to an AD user and removes the user
     from the group. Only DIRECT membership is considered: users who are not direct members are
     skipped (counted as NotMember). Direct member DNs are fetched once up front. A transcript is
-    written to %TEMP%.
+    written to %TEMP% and is always stopped, even if the run fails. Pipeline input is collected
+    first and processed once the pipeline completes. ConfirmImpact is High, so each removal
+    prompts unless -Confirm:$false is given.
 .PARAMETER File
     Path to a text/CSV file with one identifier per line (header row and blank lines are skipped).
 .PARAMETER User
@@ -17,16 +19,16 @@
 .EXAMPLE
     Remove-ADGroupUser -User "jdoe@contoso.com" -Group "Sales Team" -WhatIf
 .EXAMPLE
-    Get-Content .\users.txt | Remove-ADGroupUser -Group "Sales Team"
+    Get-Content .\users.txt | Remove-ADGroupUser -Group "Sales Team" -Confirm:$false
 .NOTES
     Name: Remove-ADGroupUser
-    Version: 2.0.0
+    Version: 2.1.0
     Author: WGuethlein
-    Date: 2026-10-02
+    Date: 2026-10-04
     Prerequisites: ActiveDirectory module, rights to modify the group
 #>
 function Remove-ADGroupUser {
-    [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'File')]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'File')]
     param(
         [Parameter(Mandatory, ParameterSetName = 'File')]
         [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
@@ -43,7 +45,18 @@ function Remove-ADGroupUser {
 
     begin {
         Assert-Module -Name ActiveDirectory
+        $pipelineUsers = New-Object 'System.Collections.Generic.List[string]'
+    }
 
+    # Only collect input here; all work happens in end{} so one try/finally can guarantee
+    # Stop-Transcript runs even after a terminating error.
+    process {
+        if ($PSCmdlet.ParameterSetName -eq 'SingleUser') {
+            foreach ($u in $User) { $pipelineUsers.Add($u) }
+        }
+    }
+
+    end {
         try {
             $adGroup = Get-ADGroup -Identity $Group -Properties Members -ErrorAction Stop
             Write-Verbose "Target group: $($adGroup.Name) ($($adGroup.DistinguishedName))"
@@ -59,60 +72,60 @@ function Remove-ADGroupUser {
         $transcriptPath = Join-Path $env:TEMP "Remove-ADGroupUser_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
         Start-Transcript -Path $transcriptPath -WhatIf:$false | Out-Null
 
-        $successCount = 0
-        $failCount = 0
-        $notFoundCount = 0
-        $notMemberCount = 0
-        Write-Host "Removing from group: $($adGroup.Name)" -ForegroundColor Cyan
-    }
+        try {
+            $successCount = 0
+            $failCount = 0
+            $notFoundCount = 0
+            $notMemberCount = 0
+            Write-Host "Removing from group: $($adGroup.Name)" -ForegroundColor Cyan
 
-    process {
-        if ($PSCmdlet.ParameterSetName -eq 'File') {
-            $resolved = @(Resolve-ADUserIdentity -File $File)
-            Write-Host "Processing $($resolved.Count) users from '$File'" -ForegroundColor Cyan
-        }
-        else {
-            $resolved = @(Resolve-ADUserIdentity -User $User)
-        }
-
-        foreach ($item in $resolved) {
-            if ($null -eq $item.ADUser) {
-                Write-Warning "User not found: $($item.Input) ($($item.Error))"
-                $notFoundCount++
-                continue
+            if ($PSCmdlet.ParameterSetName -eq 'File') {
+                $resolved = @(Resolve-ADUserIdentity -File $File)
+                Write-Host "Processing $($resolved.Count) users from '$File'" -ForegroundColor Cyan
             }
-            $adUser = $item.ADUser
-
-            if (-not $memberDns.Contains($adUser.DistinguishedName)) {
-                Write-Verbose "Not a direct member (skipping): $($item.Input) ($($adUser.SamAccountName))"
-                $notMemberCount++
-                continue
+            else {
+                $resolved = @(Resolve-ADUserIdentity -User $pipelineUsers.ToArray())
             }
 
-            if ($PSCmdlet.ShouldProcess("$($item.Input) ($($adUser.SamAccountName))", "Remove from $($adGroup.Name)")) {
-                try {
-                    Remove-ADGroupMember -Identity $adGroup -Members $adUser -Confirm:$false -ErrorAction Stop
-                    [void]$memberDns.Remove($adUser.DistinguishedName)
-                    Write-Host "Removed: $($item.Input) ($($adUser.SamAccountName))" -ForegroundColor Green
-                    $successCount++
+            foreach ($item in $resolved) {
+                if ($null -eq $item.ADUser) {
+                    Write-Warning "User not found: $($item.Input) ($($item.Error))"
+                    $notFoundCount++
+                    continue
                 }
-                catch {
-                    Write-Error "Failed to remove $($item.Input): $_"
-                    $failCount++
+                $adUser = $item.ADUser
+
+                if (-not $memberDns.Contains($adUser.DistinguishedName)) {
+                    Write-Verbose "Not a direct member (skipping): $($item.Input) ($($adUser.SamAccountName))"
+                    $notMemberCount++
+                    continue
+                }
+
+                if ($PSCmdlet.ShouldProcess("$($item.Input) ($($adUser.SamAccountName))", "Remove from $($adGroup.Name)")) {
+                    try {
+                        Remove-ADGroupMember -Identity $adGroup -Members $adUser -Confirm:$false -ErrorAction Stop
+                        [void]$memberDns.Remove($adUser.DistinguishedName)
+                        Write-Host "Removed: $($item.Input) ($($adUser.SamAccountName))" -ForegroundColor Green
+                        $successCount++
+                    }
+                    catch {
+                        Write-Error "Failed to remove $($item.Input): $_"
+                        $failCount++
+                    }
                 }
             }
-        }
-    }
 
-    end {
-        Write-Host ""
-        Write-Host "========== Summary ==========" -ForegroundColor Cyan
-        Write-Host "Successfully removed: $successCount" -ForegroundColor Green
-        Write-Host "Failed: $failCount" -ForegroundColor Red
-        Write-Host "Not found in AD: $notFoundCount" -ForegroundColor Yellow
-        Write-Host "Not direct members: $notMemberCount" -ForegroundColor Gray
-        Write-Host "Transcript: $transcriptPath" -ForegroundColor Cyan
-        $WhatIfPreference = $false  # Stop-Transcript has no -WhatIf in 5.1; must really stop
-        Stop-Transcript | Out-Null
+            Write-Host ""
+            Write-Host "========== Summary ==========" -ForegroundColor Cyan
+            Write-Host "Successfully removed: $successCount" -ForegroundColor Green
+            Write-Host "Failed: $failCount" -ForegroundColor Red
+            Write-Host "Not found in AD: $notFoundCount" -ForegroundColor Yellow
+            Write-Host "Not direct members: $notMemberCount" -ForegroundColor Gray
+            Write-Host "Transcript: $transcriptPath" -ForegroundColor Cyan
+        }
+        finally {
+            $WhatIfPreference = $false  # Stop-Transcript has no -WhatIf in 5.1; must really stop
+            Stop-Transcript | Out-Null
+        }
     }
 }

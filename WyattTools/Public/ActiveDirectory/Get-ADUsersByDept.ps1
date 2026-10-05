@@ -1,23 +1,24 @@
 <#
 .SYNOPSIS
-    Searches Active Directory for enabled users by department and exports results to CSV.
+    Searches Active Directory for enabled users by department.
 .DESCRIPTION
-    Queries enabled user accounts in a department and exports Name, JobTitle and Department to a
-    CSV file. Wildcards (*) are supported in -Department (for example "5*"). Other LDAP special
-    characters (backslash, parentheses, NUL) are escaped. The CSV is always written.
+    Queries enabled user accounts in a department and returns Name, JobTitle and Department
+    objects. Wildcards (*) are supported in -Department (for example "5*"). Other LDAP special
+    characters (backslash, parentheses, NUL) are escaped. With -Export the rows are also written
+    to a CSV.
 .PARAMETER Department
     Department name or wildcard pattern. Examples: "1234", "5*".
-.PARAMETER OutputPath
-    CSV file path. Default: <ExportDirectory from config, or current location>\<Department>_Users_<timestamp>.csv
+.PARAMETER Export
+    Write results to <Department>_Users_yyyyMMdd_HHmm.csv in the configured export directory.
 .EXAMPLE
-    Get-ADUsersByDept -Department "1234" -OutputPath "C:\Reports\1234_Users.csv"
+    Get-ADUsersByDept -Department "1234" -Export
 .EXAMPLE
-    Get-ADUsersByDept -Department "5*"
+    Get-ADUsersByDept -Department "5*" | Format-Table
 .NOTES
     Name: Get-ADUsersByDept
-    Version: 2.0.0
+    Version: 2.1.0
     Author: WGuethlein
-    Date: 2026-10-02
+    Date: 2026-10-04
     Prerequisites: ActiveDirectory module
 #>
 function Get-ADUsersByDept {
@@ -27,23 +28,11 @@ function Get-ADUsersByDept {
         [ValidateNotNullOrEmpty()]
         [string]$Department,
 
-        [Parameter(Position = 1, HelpMessage = "Enter the output CSV file path")]
-        [ValidateNotNullOrEmpty()]
-        [string]$OutputPath
+        [Parameter()]
+        [switch]$Export
     )
 
     Assert-Module -Name ActiveDirectory
-
-    if (-not $OutputPath) {
-        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $safeName  = $Department -replace '[\\/:*?"<>|]', '_'
-        $OutputPath = Join-Path -Path (Get-ExportDirectory) -ChildPath "${safeName}_Users_${timestamp}.csv"
-    }
-
-    $outputDirectory = Split-Path -Path $OutputPath -Parent
-    if ($outputDirectory -and -not (Test-Path -Path $outputDirectory)) {
-        throw "Output directory does not exist: $outputDirectory"
-    }
 
     # Escape LDAP filter specials per RFC 4515 except '*', which stays a wildcard.
     # Backslash must be replaced first.
@@ -66,9 +55,14 @@ function Get-ADUsersByDept {
             }
         } | Sort-Object Department, Name
 
-        $results | Export-Csv -Path $OutputPath -NoTypeInformation -Encoding UTF8 -Force
-        Write-Host "Successfully exported $(@($results).Count) user(s) to: $OutputPath" -ForegroundColor Green
-        Get-Item -Path $OutputPath
+        if ($Export) {
+            $safeName = $Department -replace '[\\/:*?"<>|]', '_'
+            $path = Join-Path (Get-ExportDirectory) ('{0}_Users_{1}.csv' -f $safeName, (Get-Date -Format 'yyyyMMdd_HHmm'))
+            $results | Export-Csv -Path $path -NoTypeInformation -Encoding UTF8
+            Write-Host "Exported to $path" -ForegroundColor Cyan
+        }
+
+        $results
     }
     catch {
         Write-Error "An error occurred while querying Active Directory or exporting data: $_"

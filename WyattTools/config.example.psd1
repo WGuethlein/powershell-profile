@@ -22,7 +22,7 @@
     StaleDays        = 90
 
     # Microsoft Graph delegated scopes.
-    GraphScopes      = @('User.Read.All', 'Group.Read.All', 'Directory.Read.All', 'AuditLog.Read.All')
+    GraphScopes      = @('User.Read.All', 'Group.Read.All', 'Directory.Read.All', 'AuditLog.Read.All', 'UserAuthenticationMethod.Read.All')
 
     # License group -> SKU part number(s) it should grant (used by Get-GroupLicenseGap).
     LicenseGroups    = @{

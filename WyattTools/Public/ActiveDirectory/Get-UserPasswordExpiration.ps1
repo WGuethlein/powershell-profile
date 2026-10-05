@@ -6,16 +6,18 @@
     policies are honored. A value of 0 or Int64 max means the password does not expire (or
     expiry is not applicable). Returns one object per user.
 .PARAMETER Username
-    SamAccountName (or other Get-ADUser identity). Accepts pipeline input.
+    SamAccountName, UPN, or email address. Accepts pipeline input.
 .EXAMPLE
     Get-UserPasswordExpiration -Username jdoe
+.EXAMPLE
+    Get-UserPasswordExpiration -Username jdoe@contoso.com
 .EXAMPLE
     'jdoe','asmith' | Get-PwdExp | Format-Table
 .NOTES
     Name: Get-UserPasswordExpiration
-    Version: 2.0.0
+    Version: 2.1.0
     Author: WGuethlein
-    Date: 2026-10-02
+    Date: 2026-10-04
     Prerequisites: ActiveDirectory module
 #>
 function Get-UserPasswordExpiration {
@@ -32,8 +34,16 @@ function Get-UserPasswordExpiration {
     }
 
     process {
+        # Resolves SamAccountName, UPN or email; a miss comes back as ADUser = $null.
+        $item = @(Resolve-ADUserIdentity -User $Username -Properties $props) | Select-Object -First 1
+        if ($null -eq $item) { return }
+        if ($null -eq $item.ADUser) {
+            Write-Warning "User not found: $($item.Input) ($($item.Error))"
+            return
+        }
+
         try {
-            $user = Get-ADUser -Identity $Username -Properties $props -ErrorAction Stop
+            $user = $item.ADUser
             $raw  = $user.'msDS-UserPasswordExpiryTimeComputed'
 
             $expiresOn = $null
