@@ -65,6 +65,7 @@ Worked examples for every command, including combined and piped uses, are in
 - `Invoke-ApiPost` (`post`) - Sends a POST request with a JSON body and returns the status code, timing, and parsed body.
 - `Convert-ToBase64` (`B64E`) - Base64-encodes a string.
 - `grep` - Searches files or piped output for a pattern, grep-style (`-i -r -v -n -l -c`); use `rg` (ripgrep, installed by Bootstrap) for big folders.
+- `Copy-FolderFast` (`fcopy`) - Copies a folder with multithreaded robocopy, skipping files already at the destination unless `-Overwrite`; leave out a path to pick it in a folder dialog, `-WhatIf` for a dry run.
 
 ### Git
 

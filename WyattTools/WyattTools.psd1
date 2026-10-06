@@ -40,6 +40,7 @@
         'Invoke-ApiPost'
         'Convert-ToBase64'
         'grep'
+        'Copy-FolderFast'
         'push'
         'pull'
         'commit'
@@ -47,5 +48,5 @@
     )
     CmdletsToExport   = @()
     VariablesToExport = @()
-    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset', 'm365info', 'table', 'mydc')
+    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset', 'm365info', 'table', 'mydc', 'fcopy')
 }

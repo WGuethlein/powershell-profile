@@ -452,6 +452,27 @@ Get-Service | grep -i sql
 ```
 Gotcha: flags are separate (-i -r -n, not -irn) and it is case-sensitive unless you pass -i. Folders need -r. For big trees use `rg`.
 
+### `Copy-FolderFast` (`fcopy`)
+Copies a folder with robocopy (32 threads, 2 retries), never overwriting files already at the destination unless `-Overwrite`.
+```powershell
+# Simple case: copy what is missing, leave existing files alone
+fcopy C:\TempProject 'X:\Projects\Archive\Project Drive'
+
+# Pick both folders in dialogs
+fcopy
+
+# More complex: dry run listing every file that would be copied
+fcopy C:\TempProject '\\fs01\Projects\Archive\Project Drive' -WhatIf -ListFiles
+
+# More complex: sync changed files too, skipping junk folders and temp files
+Copy-FolderFast D:\Jobs \\fs01\Jobs -Overwrite -ExcludeDirectory '.git','node_modules' -ExcludeFile '*.tmp' -Threads 64
+
+# More complex: a few huge files over a flaky link; show the log tail if anything failed
+$r = fcopy D:\Video \\nas01\Video -Threads 8 -Unbuffered -Restartable
+if (-not $r.Success) { tail $r.LogPath -Lines 50 }
+```
+Gotcha: an interrupted copy is safe to re-run (copied files are skipped). Mapped drives are missing in an elevated shell, so use a non-elevated shell or the UNC path. If it is still slow, the network or antivirus scanning each new file is the bottleneck, not the copy tool.
+
 ## Git
 
 ### `add`
