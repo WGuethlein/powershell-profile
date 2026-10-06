@@ -24,6 +24,15 @@
     Connect-M365 -Exchange
 .EXAMPLE
     Connect-M365 -Graph -Scopes 'User.Read.All','Group.Read.All'
+.EXAMPLE
+    Connect-M365 -Exchange -DisableWAM
+    Sign in to Exchange Online with the browser instead of Web Account Manager.
+.EXAMPLE
+    Connect-M365 -Disconnect
+    Disconnect both Graph and Exchange Online.
+.EXAMPLE
+    Connect-M365 -Graph -Disconnect
+    Disconnect Graph only; add -Exchange to disconnect Exchange Online only.
 .NOTES
     Name: Connect-M365
     Version: 1.0.0

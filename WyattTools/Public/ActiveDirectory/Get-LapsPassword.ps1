@@ -15,6 +15,12 @@
     Get-LapsPassword PC1234
 .EXAMPLE
     laps PC1234 -ClearAfter 0
+.EXAMPLE
+    Get-ADComputer 'PC-0423' | Get-LapsPassword -ClearAfter 120
+    Takes the computer from the pipeline and keeps the password on the clipboard for two minutes.
+.EXAMPLE
+    laps PC-0423 | Select-Object ComputerName, Account, ExpirationTimestamp
+    Shows which local account the password belongs to and when it expires (the password itself is never printed).
 .NOTES
     Name: Get-LapsPassword
     Version: 1.0

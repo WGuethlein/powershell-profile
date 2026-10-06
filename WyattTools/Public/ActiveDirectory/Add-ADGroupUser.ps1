@@ -19,6 +19,15 @@
     Add-ADGroupUser -User "jdoe@contoso.com" -Group "Sales Team" -WhatIf
 .EXAMPLE
     Get-Content .\users.txt | Add-ADGroupUser -Group "Sales Team"
+.EXAMPLE
+    Add-ADGroupUser -File "C:\Temp\users.csv" -Group "VPN-Users" -WhatIf -Verbose
+    Previews a CSV load; -Verbose also lists the users skipped because they are already direct members.
+.EXAMPLE
+    Add-ADGroupUser -User 'jdoe','asmith@contoso.com' -Group "VPN-Users"
+    Adds several users in one call; each identifier can be a SamAccountName, UPN, or email.
+.EXAMPLE
+    Import-Csv C:\Temp\users.csv | Select-Object -ExpandProperty Email | Add-ADGroupUser -Group "VPN-Users"
+    Pulls one column out of a multi-column CSV and pipes the identifiers in.
 .NOTES
     Name: Add-ADGroupUser
     Version: 2.1.0

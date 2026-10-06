@@ -13,6 +13,9 @@
     Get-ConnectedDC
 .EXAMPLE
     mydc
+.EXAMPLE
+    mydc -Domain contoso.com | Select-Object LogonServer, SecureChannel, LocatorDC, LocatorSite
+    Queries a specific domain and shows whether the three views of "my DC" agree.
 .NOTES
     Name: Get-ConnectedDC
     Version: 1.0

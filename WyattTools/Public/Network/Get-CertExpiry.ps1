@@ -15,6 +15,15 @@
     Get-CertExpiry github.com
 .EXAMPLE
     'https://www.microsoft.com/en-us','mail.contoso.com:993' | Get-CertExpiry -WarnDays 60
+.EXAMPLE
+    Get-CertExpiry -HostName mail.contoso.com -Port 993
+    Checks the certificate on a non-standard port when no port is given in the name.
+.EXAMPLE
+    'web01.contoso.com','https://api.example.com','ldap01.contoso.com:636' | Get-CertExpiry | Sort-Object DaysRemaining | Format-Table HostName, Port, DaysRemaining, Status
+    Mixes bare host, URL, and host:port targets and lists the soonest expiry first.
+.EXAMPLE
+    Get-Content hosts.txt | Get-CertExpiry -WarnDays 45 | Where-Object { $_.Status -ne 'OK' }
+    Reads one target per line from a file and shows only expired, expiring, or unreachable ones.
 .NOTES
     Name: Get-CertExpiry
     Version: 1.0

@@ -13,6 +13,12 @@
     Get-UserPasswordExpiration -Username jdoe@contoso.com
 .EXAMPLE
     'jdoe','asmith' | Get-PwdExp | Format-Table
+.EXAMPLE
+    Get-Content C:\Temp\users.txt | Get-PwdExp | Where-Object { $_.DaysRemaining -le 14 } | Sort-Object DaysRemaining
+    Lists users whose password expires within two weeks (or already has), soonest first.
+.EXAMPLE
+    Get-ADUser -Filter "Department -eq '1234'" | Get-PwdExp | Where-Object Expired
+    Pipes AD user objects in (matched by SamAccountName) and keeps only users with an expired password.
 .NOTES
     Name: Get-UserPasswordExpiration
     Version: 2.1.0

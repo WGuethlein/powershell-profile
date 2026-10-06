@@ -15,6 +15,12 @@
     Copy-ADGroupMembership -SourceUser jdoe -TargetUser asmith -WhatIf
 .EXAMPLE
     Copy-ADGroupMembership -SourceUser jdoe -TargetUser asmith -ExcludeGroup 'Domain Users','VPN Users'
+.EXAMPLE
+    Copy-ADGroupMembership jdoe@contoso.com asmith@contoso.com | Format-Table
+    Uses email addresses (positional) and shows what happened to each group: Added, AlreadyMember, Excluded, or Failed.
+.EXAMPLE
+    Copy-ADGroupMembership -SourceUser jdoe -TargetUser asmith | Where-Object Status -eq 'Failed'
+    Runs the copy and lists only the groups that could not be added.
 .NOTES
     Name: Copy-ADGroupMembership
     Version: 1.0

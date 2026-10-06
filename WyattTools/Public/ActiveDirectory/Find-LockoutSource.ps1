@@ -16,6 +16,12 @@
     Find-LockoutSource -User jdoe -Hours 4
 .EXAMPLE
     Find-LockoutSource
+.EXAMPLE
+    Find-LockoutSource -Hours 72 | Group-Object CallerComputer | Sort-Object Count -Descending
+    Shows which computers caused the most lockouts over the last three days.
+.EXAMPLE
+    Find-LockoutSource jdoe@contoso.com -Server DC01.contoso.com | Export-Csv C:\Temp\lockouts.csv -NoTypeInformation
+    Resolves a user by email, queries a specific domain controller, and saves the events.
 .NOTES
     Name: Find-LockoutSource
     Version: 1.0

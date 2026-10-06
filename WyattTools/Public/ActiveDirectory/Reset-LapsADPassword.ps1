@@ -13,6 +13,12 @@
     Reset-LapsADPassword PC1234
 .EXAMPLE
     'PC1234','PC5678' | Reset-LapsADPassword -WhatIf
+.EXAMPLE
+    Get-ADComputer -Filter "Name -like 'LAB-*'" | Reset-LapsADPassword -WhatIf
+    Previews expiring the LAPS password on every computer matching a name pattern.
+.EXAMPLE
+    lapsreset PC-0423; laps PC-0423
+    Expires the password; run laps again after the device's next policy cycle to copy the new one.
 .NOTES
     Name: Reset-LapsADPassword
     Version: 1.0

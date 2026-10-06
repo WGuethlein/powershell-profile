@@ -21,6 +21,12 @@
     Get-ExternalForwarding -Mailbox jdoe@contoso.com -IncludeInternal
 .EXAMPLE
     Get-ExternalForwarding -Export
+.EXAMPLE
+    extfwd -Mailbox jdoe@contoso.com, asmith@contoso.com -SkipInboxRules -IncludeInternal
+    Check mailbox-level forwarding only for two mailboxes, including internal targets.
+.EXAMPLE
+    extfwd | Where-Object { $_.Source -eq 'InboxRule' -and $_.RuleEnabled -eq $false } | Format-Table Mailbox, RuleName, Target
+    Find disabled inbox rules that still point outside the organization.
 .NOTES
     Name: Get-ExternalForwarding
     Version: 1.1.0

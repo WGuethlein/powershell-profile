@@ -17,6 +17,15 @@
     Get-StaleAccounts -Days 120 -Type Computer
 .EXAMPLE
     Get-StaleAccounts -IncludeDisabled -Export
+.EXAMPLE
+    Get-StaleAccounts -Type User -Days 180 | Sort-Object DaysInactive -Descending | Select-Object -First 25
+    Shows the 25 longest-inactive enabled users past 180 days.
+.EXAMPLE
+    Get-StaleAccounts -Type Computer | Group-Object { $_.DistinguishedName -replace '^CN=[^,]+,' } | Sort-Object Count -Descending
+    Counts stale computers per OU to see where the clutter is.
+.EXAMPLE
+    Get-StaleAccounts -Days 365 -Export | Where-Object { $_.LastLogon -eq $null }
+    Exports the year-stale list and also shows accounts that have never logged on.
 .NOTES
     Name: Get-StaleAccounts
     Version: 1.0

@@ -29,6 +29,15 @@
     Get-LicenseReclaim -SkuPartNumber ENTERPRISEPACK
 .EXAMPLE
     Get-LicenseReclaim -Days 60 -Export
+.EXAMPLE
+    Get-LicenseReclaim -SkuPartNumber 'SPE_E3', 'ENTERPRISEPACK' -Days 120 | Where-Object Reason -eq 'Disabled'
+    Disabled accounts that still hold one of two E3 SKUs (the -Days value does not affect disabled accounts).
+.EXAMPLE
+    Get-LicenseReclaim | Where-Object Reason -eq 'Inactive' | Sort-Object DaysInactive -Descending | Select-Object -First 10
+    The ten longest-inactive licensed users.
+.EXAMPLE
+    Get-LicenseReclaim -Days 180 | Get-M365UserInfo | Format-List DisplayName, LastSignIn, Licenses, LicenseErrors
+    Look up the full account details of each reclaim candidate before removing licenses.
 .NOTES
     Name: Get-LicenseReclaim
     Version: 1.0.0

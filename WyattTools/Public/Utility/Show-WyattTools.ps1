@@ -14,6 +14,9 @@
     tools
 .EXAMPLE
     Show-WyattTools -Detailed
+.EXAMPLE
+    Show-WyattTools -Detailed -Width 80
+    Shows the synopsis and first example for every command, wrapped at 80 characters.
 .NOTES
     Name: Show-WyattTools
     Version: 1.0.0

@@ -19,13 +19,15 @@ tweaks including a filter that keeps likely secrets out of the history file.
 - `tools -Detailed` adds descriptions.
 
 Aliases are in parentheses. Every command has help: `Get-Help <command> -Examples`.
+Worked examples for every command, including combined and piped uses, are in
+[docs/EXAMPLES.md](docs/EXAMPLES.md).
 
 ### Active Directory
 
 - `Add-ADGroupUser` - Adds one user or a CSV of users to an AD group, skipping anyone already a direct member.
 - `Remove-ADGroupUser` - Removes one user or a CSV of users from an AD group, only if they are a direct member.
 - `Copy-ADGroupMembership` - Adds a target user to every group a source user is directly in (never removes anything).
-- `Compare-ADGroupMembers` - Lists a group's users, combined with other groups via `-Or` (either), `-And` (both) and `-Not` (exclude). Nested members count unless `-DirectOnly`.
+- `Compare-ADGroupMembers` - Lists a group's users, combined with other groups via `-Or` (either), `-And` (both) and `-Not` (exclude). Nested members count unless `-DirectOnly`. To exclude several groups use `-Not 'A', 'B'`; `-Or` adds users, it does not extend `-Not` ([examples](docs/EXAMPLES.md#compare-adgroupmembers)).
 - `Get-ADUserInfo` (`adinfo`) - Shows one user's account status, password dates, last logon, manager, and groups.
 - `Get-ADUserDepartment` - Looks up the department for one user or a CSV of users.
 - `Get-ADUsersByDept` - Lists all enabled users in a department (wildcards allowed); `-Export` saves a CSV.

@@ -28,6 +28,15 @@
     'a@contoso.com', 'b@contoso.com' | Get-M365UserInfo
 .EXAMPLE
     Get-M365UserInfo jdoe@contoso.com -Mailbox | Format-List
+.EXAMPLE
+    Get-Content .\users.txt | m365info -Mailbox | Where-Object Forwarding | Select-Object UserPrincipalName, Forwarding
+    Check a list of users and show only those with a mailbox forwarding address.
+.EXAMPLE
+    m365info jdoe@contoso.com | Select-Object -ExpandProperty Licenses
+    List each license and whether it is direct or comes from a group.
+.EXAMPLE
+    Get-LicenseReclaim -Days 90 | m365info | Where-Object LicenseErrors | Select-Object UserPrincipalName, LicenseErrors
+    Chain from reclaim candidates to see which ones also have license assignment errors.
 .NOTES
     Name: Get-M365UserInfo
     Version: 1.0.0

@@ -13,6 +13,15 @@
     Get-ADUserInfo jdoe
 .EXAMPLE
     adinfo jdoe@contoso.com | Format-List
+.EXAMPLE
+    'jdoe','asmith' | adinfo | Select-Object SamAccountName, Enabled, LockedOut, PasswordExpires, LastLogon
+    Compares account status for several users in one table.
+.EXAMPLE
+    (adinfo jdoe).MemberOf -contains 'VPN-Users'
+    Checks whether a user is a direct member of a specific group (returns True or False).
+.EXAMPLE
+    Get-ADUser -Filter "Department -eq '1234'" | adinfo | Where-Object LockedOut
+    Pipes AD user objects in (matched by SamAccountName) and keeps only locked-out accounts.
 .NOTES
     Name: Get-ADUserInfo
     Version: 1.0

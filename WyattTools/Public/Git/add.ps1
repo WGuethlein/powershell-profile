@@ -7,6 +7,9 @@
     Path to stage. Default ".".
 .EXAMPLE
     add .\file.txt
+.EXAMPLE
+    add
+    Stages everything under the current directory (the default path is '.').
 .NOTES
     Name: add
     Version: 1.0.0

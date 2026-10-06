@@ -15,7 +15,8 @@
 .PARAMETER And
     Groups the user must also be in (all of them).
 .PARAMETER Or
-    Groups whose users are added to -Group's users.
+    Groups whose users are added to -Group's users. This widens the starting set; it does not
+    add to -Not. To exclude several groups, list them all after -Not.
 .PARAMETER DirectOnly
     Use direct members only instead of including nested groups.
 .PARAMETER Export
@@ -32,11 +33,28 @@
 .EXAMPLE
     Compare-ADGroupMembers 'Staff' 'Office-A', 'Office-B'
     Positional form: users in Staff who are in neither Office-A nor Office-B.
+.EXAMPLE
+    Compare-ADGroupMembers -Group 'Senior-Leaders' -Not 'LIC-Copilot-A', 'LIC-Copilot-B' | Format-Table
+    Senior leaders who have neither Copilot license group. Several -Not groups means "in none of them".
+.EXAMPLE
+    Compare-ADGroupMembers -Group 'Senior-Leaders' -Not 'LIC-Copilot-A' -Or 'LIC-Copilot-B'
+    Common mistake: this is (Senior-Leaders or LIC-Copilot-B) not in LIC-Copilot-A, so LIC-Copilot-B
+    members who are not senior leaders show up too. Use the previous example instead. Prints a warning.
+.EXAMPLE
+    Compare-ADGroupMembers -Group 'Senior-Leaders' -Or 'Directors' -And 'Remote-Staff' -Not 'MFA-Enrolled'
+    Senior leaders or directors who are remote staff and not MFA enrolled. Order of evaluation is
+    always: -Group plus -Or, then -And, then -Not, regardless of the order typed.
+.EXAMPLE
+    Compare-ADGroupMembers -Group 'Senior-Leaders' -And 'LIC-Copilot-A', 'LIC-Copilot-B'
+    Senior leaders who are in BOTH license groups (double-licensed).
+.EXAMPLE
+    Compare-ADGroupMembers -Group 'VPN-Users' -Not 'MFA-Enrolled' -DirectOnly | Where-Object { -not $_.Enabled }
+    Direct members of VPN-Users, not in MFA-Enrolled, filtered to disabled accounts.
 .NOTES
     Name: Compare-ADGroupMembers
-    Version: 1.2.0
+    Version: 1.3.0
     Author: WGuethlein
-    Date: 2026-10-04
+    Date: 2026-10-06
     Prerequisites: ActiveDirectory module
 #>
 function Compare-ADGroupMembers {
@@ -108,6 +126,11 @@ function Compare-ADGroupMembers {
     $andGroups = & $resolveAll $And
     $notGroups = & $resolveAll $Not
     if ($null -eq $orGroups -or $null -eq $andGroups -or $null -eq $notGroups) { return }
+
+    # "-Not A -Or B" reads like "not in A or B" but means "(Group or B) not in A".
+    if ($orGroups.Count -gt 0 -and $notGroups.Count -gt 0) {
+        Write-Warning ("-Or ADDS users from '{0}' to the results. To exclude users in several groups, list them all after -Not: -Not 'A', 'B'." -f (@($orGroups | ForEach-Object { $_.Name }) -join "', '"))
+    }
 
     # -Group plus -Or groups, de-duplicated by DN.
     $users = @{}

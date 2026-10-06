@@ -15,6 +15,12 @@
     Show-InboxRuleDescription -Mailbox jdoe@contoso.com
 .EXAMPLE
     Get-Mailbox jdoe | ibr | Format-List
+.EXAMPLE
+    ibr jdoe@contoso.com -IncludeHidden | Where-Object Enabled
+    Show only the enabled rules, including hidden ones, for one mailbox.
+.EXAMPLE
+    'a@contoso.com', 'b@contoso.com' | ibr | Sort-Object Mailbox, Priority | Export-Csv .\rules.csv -NoTypeInformation
+    Collect the rules for several mailboxes and save them to a CSV.
 .NOTES
     Name: Show-InboxRuleDescription
     Version: 2.0.0

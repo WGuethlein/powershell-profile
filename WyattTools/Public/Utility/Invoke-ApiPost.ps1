@@ -12,6 +12,15 @@
     Optional extra headers, for example @{ Authorization = "Bearer ..." }.
 .EXAMPLE
     post https://api.example.com/users '{"name":"Ada"}'
+.EXAMPLE
+    post https://api.example.com/users '{"name":"Ada"}' @{ Authorization = 'Bearer <token>' }
+    Sends a JSON body with an Authorization header (Headers is the third positional parameter).
+.EXAMPLE
+    $body = @{ name = 'Ada'; roles = @('admin','dev') } | ConvertTo-Json -Compress; post https://api.example.com/users $body
+    Builds the JSON body from a hashtable first, then posts it.
+.EXAMPLE
+    Invoke-ApiPost -Uri https://api.example.com/orders -Body '{"id":7}' -Headers @{ 'X-Api-Key' = '<key>' } | Select-Object StatusCode, ElapsedMs, RawBody
+    Uses named parameters and a custom header and shows the status, timing, and unparsed response.
 .NOTES
     Name: Invoke-ApiPost
     Version: 2.0.0

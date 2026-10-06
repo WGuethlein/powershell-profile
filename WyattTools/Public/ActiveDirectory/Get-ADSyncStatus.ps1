@@ -13,6 +13,12 @@
     Get-ADSyncStatus
 .EXAMPLE
     (Get-ADSyncStatus -Last 10).RecentRuns | Format-Table
+.EXAMPLE
+    (Get-ADSyncStatus -Last 50).RecentRuns | Where-Object Result -ne 'success'
+    Lists only the recent runs that did not succeed.
+.EXAMPLE
+    Get-ADSyncStatus -ComputerName 'sync01.contoso.com' | Select-Object SyncCycleInProgress, NextSyncCycleStart
+    Checks a specific server and shows whether a cycle is running and when the next one starts.
 .NOTES
     Name: Get-ADSyncStatus
     Version: 1.0

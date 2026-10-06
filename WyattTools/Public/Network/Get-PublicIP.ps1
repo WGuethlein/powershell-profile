@@ -6,6 +6,9 @@
     Returns the address as a string. Enables TLS 1.2 on Windows PowerShell 5.1.
 .EXAMPLE
     Get-PublicIP
+.EXAMPLE
+    Get-PublicIP -Verbose
+    Shows which lookup service answered, including when the first one failed and the fallback was used.
 .NOTES
     Name: Get-PublicIP
     Version: 1.0

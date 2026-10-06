@@ -20,6 +20,12 @@
     Remove-ADGroupUser -User "jdoe@contoso.com" -Group "Sales Team" -WhatIf
 .EXAMPLE
     Get-Content .\users.txt | Remove-ADGroupUser -Group "Sales Team" -Confirm:$false
+.EXAMPLE
+    Remove-ADGroupUser -File "C:\Temp\users.csv" -Group "VPN-Users" -WhatIf -Verbose
+    Previews a CSV removal; -Verbose lists users skipped because they are not direct members.
+.EXAMPLE
+    Remove-ADGroupUser -User 'jdoe','asmith@contoso.com' -Group "VPN-Users" -Confirm:$false
+    Removes several users in one call without the per-user confirmation prompt.
 .NOTES
     Name: Remove-ADGroupUser
     Version: 2.1.0

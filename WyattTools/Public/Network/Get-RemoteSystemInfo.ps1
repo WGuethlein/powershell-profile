@@ -15,6 +15,15 @@
     Get-RemoteSystemInfo
 .EXAMPLE
     'srv01','srv02' | Get-RemoteSystemInfo -Credential (Get-Credential) | Format-Table ComputerName, OS, Uptime, DiskSummary
+.EXAMPLE
+    Get-RemoteSystemInfo -ComputerName srv01,srv02,srv03 -ThrottleLimit 10 | Select-Object ComputerName, OS, Uptime, MemoryGB, DiskSummary
+    Queries several servers at once, limited to 10 concurrent connections.
+.EXAMPLE
+    Get-Content servers.txt | Get-RemoteSystemInfo | Where-Object { $_.Error }
+    Reads server names from a file and shows only the ones that could not be reached, with the error text.
+.EXAMPLE
+    Get-RemoteSystemInfo srv01 | Select-Object -ExpandProperty Disks | Format-Table DeviceID, SizeGB, FreeGB, FreePct
+    Shows the per-drive detail instead of the one-line DiskSummary.
 .NOTES
     Name: Get-RemoteSystemInfo
     Version: 1.0

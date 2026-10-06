@@ -18,6 +18,12 @@
     tail -n 50 app.log
 .EXAMPLE
     tail app.log 50 -f
+.EXAMPLE
+    tail -n 200 app.log | grep -i error
+    Shows the last 200 lines and keeps only the ones containing 'error'.
+.EXAMPLE
+    Get-FileTail -Path app.log -Lines 0 -Follow
+    Shows only new lines as they are written, skipping the existing content.
 .NOTES
     Name: Get-FileTail
     Version: 2.0.0

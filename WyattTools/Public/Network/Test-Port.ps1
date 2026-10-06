@@ -15,6 +15,15 @@
     Test-Port localhost 135,1
 .EXAMPLE
     'web01','web02' | Test-Port -Port 443
+.EXAMPLE
+    Test-Port -ComputerName server01 -Port 22,80,443,3389 -TimeoutMs 3000
+    Checks four ports on one host at once, waiting up to 3 seconds for each host's connections.
+.EXAMPLE
+    'web01','web02','db01' | Test-Port -Port 443,1433 | Where-Object { -not $_.Open }
+    Tests two ports on three piped hosts and shows only the ones that did not answer.
+.EXAMPLE
+    tp server01 5985,5986 | Format-Table ComputerName, Port, Open, ResponseMs
+    Uses the tp alias to check the WinRM ports and shows the response times.
 .NOTES
     Name: Test-Port
     Version: 1.0

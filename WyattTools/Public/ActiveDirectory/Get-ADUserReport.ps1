@@ -16,6 +16,15 @@
     Get-ADUserReport -Ou Active | Format-Table
 .EXAMPLE
     Get-ADUserReport -Ou Departed -Properties SamAccountName,Manager -Export
+.EXAMPLE
+    Get-ADUserReport -Ou Active -Properties SamAccountName,Name,Title,Department,Manager | Where-Object { -not $_.Manager }
+    Finds active users with no manager set.
+.EXAMPLE
+    Get-ADUserReport -Ou Active | Group-Object Department | Sort-Object Count -Descending
+    Counts users per department in the Active OU.
+.EXAMPLE
+    Get-ADUserReport -Ou India -Properties SamAccountName,Enabled,Title -Export
+    Exports a trimmed column set for the India OU.
 .NOTES
     Name: Get-ADUserReport
     Version: 2.1.0

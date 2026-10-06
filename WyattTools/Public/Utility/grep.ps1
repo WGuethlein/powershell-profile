@@ -33,6 +33,21 @@
     grep -r -l 'Connect-MgGraph' .
 .EXAMPLE
     ipconfig | grep IPv4
+.EXAMPLE
+    grep -i -n -r 'connect-mg' ./Scripts
+    Searches a folder tree ignoring case and shows file name and line number for each match.
+.EXAMPLE
+    grep -c -i error app.log web.log
+    Counts matching lines in each file, printing 'file:count' per file (zero included).
+.EXAMPLE
+    grep -v '^#' settings.conf
+    Shows every line that is not a comment (-v inverts the match).
+.EXAMPLE
+    Get-Service | grep -i sql
+    Searches the text of piped objects as it would appear on screen.
+.EXAMPLE
+    grep -r -l -i 'password' .
+    Lists only the files under the current folder that contain the word.
 .NOTES
     Name: grep
     Version: 1.0

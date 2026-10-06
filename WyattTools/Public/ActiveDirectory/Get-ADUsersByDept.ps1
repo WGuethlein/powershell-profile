@@ -14,6 +14,12 @@
     Get-ADUsersByDept -Department "1234" -Export
 .EXAMPLE
     Get-ADUsersByDept -Department "5*" | Format-Table
+.EXAMPLE
+    Get-ADUsersByDept "5*" | Group-Object Department | Sort-Object Count -Descending
+    Counts enabled users per department across a wildcard range (department is positional).
+.EXAMPLE
+    Get-ADUsersByDept -Department "12*" -Export | Where-Object JobTitle -like '*Manager*'
+    Saves the full list to CSV and also filters the on-screen output to managers.
 .NOTES
     Name: Get-ADUsersByDept
     Version: 2.1.0

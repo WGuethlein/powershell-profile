@@ -12,6 +12,12 @@
     Get-ADUserDepartment -File "C:\users.csv"
 .EXAMPLE
     Get-ADUserDepartment -User "jdoe@contoso.com"
+.EXAMPLE
+    Get-ADUserDepartment -File "C:\Temp\users.csv" | Export-Csv C:\Temp\departments.csv -NoTypeInformation
+    Looks up a list and saves the Email, DisplayName and Department rows to a CSV.
+.EXAMPLE
+    Get-ADUserDepartment -File "C:\Temp\users.csv" | Where-Object Department -eq '<NOT FOUND>'
+    Lists only the identifiers that could not be resolved in AD.
 .NOTES
     Name: Get-ADUserDepartment
     Version: 2.0.0

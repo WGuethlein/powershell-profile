@@ -34,6 +34,15 @@
     Get-GroupLicenseGap -Map @{ 'LIC-E5' = 'SPE_E5'; 'LIC-Project' = 'PROJECTPROFESSIONAL' }
 .EXAMPLE
     Get-GroupLicenseGap -ListSkus
+.EXAMPLE
+    Get-GroupLicenseGap -GroupName 'LIC-M365-E3' -SkuPartNumber 'SPE_E3', 'ENTERPRISEPACK' -ExcludeDisabled -Export
+    Check one group where either SKU counts as licensed, skip disabled accounts, and save a CSV.
+.EXAMPLE
+    Get-GroupLicenseGap -ListSkus | Where-Object Free -lt 5
+    Show license SKUs that are nearly out of seats.
+.EXAMPLE
+    Get-GroupLicenseGap -GroupName 'LIC-M365-E3' -SkuPartNumber 'SPE_E3' | Where-Object AssignmentError | Format-Table UserPrincipalName, AssignmentError
+    List only the users whose group-based assignment failed (for example CountViolation).
 .NOTES
     Name: Get-GroupLicenseGap
     Version: 1.1.0

@@ -9,6 +9,12 @@
     Convert-ToBase64 'hello'
 .EXAMPLE
     'hello' | B64E
+.EXAMPLE
+    'user:p@ssw0rd' | Convert-ToBase64
+    Builds the Base64 part of a Basic authentication header from a piped string.
+.EXAMPLE
+    'one','two','three' | B64E
+    Encodes each piped string separately and returns one Base64 string per input.
 .NOTES
     Name: Convert-ToBase64
     Version: 1.0.0

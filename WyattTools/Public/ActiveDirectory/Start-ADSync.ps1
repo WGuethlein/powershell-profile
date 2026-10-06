@@ -14,6 +14,12 @@
     Triggers a delta sync on the configured server.
 .EXAMPLE
     if ((Start-ADSync -PolicyType Initial).Success) { 'queued' }
+.EXAMPLE
+    Start-ADSync -ComputerName 'sync01.contoso.com' -PolicyType Delta -WhatIf
+    Previews a delta sync against a specific server instead of the configured one.
+.EXAMPLE
+    $r = Start-ADSync; if (-not $r.Success) { Write-Warning $r.Message }
+    Captures the result object and reports the failure reason.
 .NOTES
     Name: Start-ADSync
     Version: 2.0.0
