@@ -40,6 +40,7 @@ Worked examples for every command, including combined and piped uses, are in
 - `Start-ADSync` - Starts an Entra Connect delta sync on the sync server.
 - `Get-ADSyncStatus` - Shows the Entra Connect scheduler state and the results of the most recent sync runs.
 - `Get-ConnectedDC` (`mydc`) - Shows which domain controller you're on: logon server, secure-channel DC, and the DC the locator returns (with IP and site).
+- `Get-FileAccess` (`faccess`) - Shows every share folder a group can reach (including through nested groups), or with `-Path` who can reach a folder and where each permission is set. Reads the index from `Update-FileAccessIndex`.
 
 ### Exchange / Microsoft 365
 
@@ -66,6 +67,7 @@ Worked examples for every command, including combined and piped uses, are in
 - `Convert-ToBase64` (`B64E`) - Base64-encodes a string.
 - `grep` - Searches files or piped output for a pattern, grep-style (`-i -r -v -n -l -c`); use `rg` (ripgrep, installed by Bootstrap) for big folders.
 - `Copy-FolderFast` (`fcopy`) - Copies a folder with multithreaded robocopy, skipping files already at the destination unless `-Overwrite`; leave out a path to pick it in a folder dialog, `-WhatIf` for a dry run.
+- `Update-FileAccessIndex` - Scans share folder permissions (folders only) and saves an index of every folder with explicit permissions or blocked inheritance; run it weekly as a scheduled task. Roots and index location come from `FileAccessRoots` and `FileAccessIndexPath` in `config.psd1`.
 
 ### Git
 

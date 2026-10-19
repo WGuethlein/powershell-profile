@@ -41,6 +41,8 @@
         'Convert-ToBase64'
         'grep'
         'Copy-FolderFast'
+        'Update-FileAccessIndex'
+        'Get-FileAccess'
         'push'
         'pull'
         'commit'
@@ -48,5 +50,5 @@
     )
     CmdletsToExport   = @()
     VariablesToExport = @()
-    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset', 'm365info', 'table', 'mydc', 'fcopy')
+    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset', 'm365info', 'table', 'mydc', 'fcopy', 'faccess')
 }

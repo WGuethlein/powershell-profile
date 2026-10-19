@@ -232,6 +232,29 @@ mydc -Domain contoso.com | Select-Object LogonServer, SecureChannel, LocatorDC, 
 ```
 Gotcha: the three values can legitimately differ (logon server is who authenticated you earlier; the locator answers right now).
 
+### `Get-FileAccess` (`faccess`)
+Answers "what file share access does this group give?" or "who can get into this folder?" from the index built by `Update-FileAccessIndex`. Nested groups count: if the group is a member of a group on an ACL, that access shows with `Via = Nested`.
+```powershell
+# Simple case: everywhere a group appears on a folder ACL
+faccess 'GRP-Engineering'
+
+# Who can reach a folder, and where each permission is set (mapped drives work)
+faccess -Path 'X:\Projects\2026\Bridge'
+
+# More complex: Modify or higher only, as a table, saved to CSV
+faccess 'GRP-Engineering' | Where-Object Access -in 'Modify', 'FullControl' |
+    Tee-Object -Variable hits | Format-Table Path, Access, GrantedTo, Via, ProtectedBelow
+$hits | Export-Csv .\engineering-access.csv -NoTypeInformation
+
+# More complex: before adding a user to a group, see what the group would give them
+faccess 'GRP-Accounting' | Format-Table Path, Access, Type, Via
+
+# More complex: groups with Modify on a folder, then their members
+faccess -Path '\\contoso.com\files$\Shared\HR' | Where-Object { $_.Access -eq 'Modify' -and $_.Type -eq 'Allow' } |
+    ForEach-Object { Compare-ADGroupMembers ($_.Identity -replace '^.*\\') }
+```
+Gotcha: the answer is only as fresh as the last scan (it warns past 14 days). `ProtectedBelow` counts subfolders that block inheritance, so a grant on a parent does not reach them unless they list the group themselves. Share-level permissions on Panzura are not read; effective access is the more restrictive of share and NTFS.
+
 ## Exchange / Microsoft 365
 
 ### `Connect-M365`
@@ -472,6 +495,28 @@ $r = fcopy D:\Video \\nas01\Video -Threads 8 -Unbuffered -Restartable
 if (-not $r.Success) { tail $r.LogPath -Lines 50 }
 ```
 Gotcha: an interrupted copy is safe to re-run (copied files are skipped). Mapped drives are missing in an elevated shell, so use a non-elevated shell or the UNC path. If it is still slow, the network or antivirus scanning each new file is the bottleneck, not the copy tool.
+
+### `Update-FileAccessIndex`
+Scans folder permissions on the file shares (folders only, never files) and saves an index of every folder where permissions are set explicitly or inheritance is blocked. `Get-FileAccess` reads it.
+```powershell
+# Simple case: scan the roots in config.psd1 (FileAccessRoots)
+Update-FileAccessIndex
+
+# Quick look at one share, top two levels only
+Update-FileAccessIndex -Root '\\contoso.com\files$\Projects' -MaxDepth 2
+
+# More complex: full scan into a shared index, under PowerShell 7 for paths over 260 characters
+pwsh -NoProfile -Command "Import-Module C:\Tools\powershell-profile\WyattTools; Update-FileAccessIndex -IndexPath '\\fs01\it$\FileAccessIndex' -Threads 32"
+
+# More complex: weekly scheduled scan as a service account with read access to every folder
+$action  = New-ScheduledTaskAction -Execute 'pwsh.exe' -Argument '-NoProfile -Command "Import-Module C:\Tools\powershell-profile\WyattTools; Update-FileAccessIndex"'
+$trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Saturday -At 1am
+Register-ScheduledTask -TaskName 'FileAccessIndex' -Action $action -Trigger $trigger -User 'CONTOSO\svc-aclscan' -Password (Read-Host 'Password')
+
+# Folders the scan could not read
+Import-Csv "$env:LOCALAPPDATA\WyattTools\FileAccessIndex\scan-errors.csv" | Group-Object Message | Sort-Object Count -Descending
+```
+Gotcha: folders the scanning account cannot read are listed in `scan-errors.csv`, not silently skipped. The index lists folder names and who can open them, so keep a shared `IndexPath` on a restricted share.
 
 ## Git
 

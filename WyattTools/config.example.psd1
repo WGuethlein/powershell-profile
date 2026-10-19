@@ -32,4 +32,11 @@
 
     # Default export directory. Blank = current location.
     ExportDirectory  = ''
+
+    # Root folders scanned by Update-FileAccessIndex (UNC or DFS paths).
+    FileAccessRoots  = @('\\contoso.com\files$\Projects', '\\contoso.com\files$\Shared')
+
+    # Where the file access index is stored. Blank = %LOCALAPPDATA%\WyattTools\FileAccessIndex.
+    # Set to a restricted UNC share so a scheduled scan and your shell share one index.
+    FileAccessIndexPath = ''
 }
