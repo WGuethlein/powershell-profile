@@ -507,6 +507,24 @@ if (-not $r.Success) { tail $r.LogPath -Lines 50 }
 ```
 Gotcha: an interrupted copy is safe to re-run (copied files are skipped). Mapped drives are missing in an elevated shell, so use a non-elevated shell or the UNC path. If it is still slow, the network or antivirus scanning each new file is the bottleneck, not the copy tool.
 
+### `Find-SensitiveData` (`piiscan`)
+Scans a local drive for files containing PII or secrets and writes a CSV with masked samples. Read-only: it never changes, moves, or deletes a scanned file, and it skips OneDrive cloud-only files unless asked.
+```powershell
+# Simple case: scan the default folders (C:\Users plus the other top-level folders on C:)
+piiscan
+
+# Only your own profile, secrets only, report to a chosen file
+Find-SensitiveData -Path $env:USERPROFILE -Category Secret -OutputPath D:\triage\secrets.csv
+
+# More complex: a data drive with four workers, skipping some folders, then show the high-confidence hits
+$f = piiscan -Path D:\Share -PassThru -ThrottleLimit 4 -ExcludeDirectory 'Archive','*.old'
+$f | Where-Object Confidence -eq High | Sort-Object Path | Format-Table Path, FindingType, Sample
+
+# More complex: include files that exist only in OneDrive (this downloads them)
+piiscan -Path "$env:USERPROFILE\OneDrive - Contoso" -IncludeCloudFiles -MaxFileSizeMB 20
+```
+Gotcha: the CSV and the `-errors.csv` list where sensitive data lives, so keep them private and delete them after triage. Low-confidence rows (BankAccount, DriversLicense, Passport) are noisy by design. Run elevated to read other users' profiles; unreadable folders are listed in the errors file.
+
 ### `Update-FileAccessIndex`
 Scans folder permissions on the file shares (folders only, never files) and saves an index of every folder where permissions are set explicitly or inheritance is blocked. `Get-FileAccess` reads it.
 ```powershell
