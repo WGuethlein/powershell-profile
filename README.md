@@ -57,6 +57,7 @@ Worked examples for every command, including combined and piped uses, are in
 - `Get-CertExpiry` - Shows when a website's TLS certificate expires and flags ones expiring soon.
 - `Get-PublicIP` - Returns this machine's public IP address.
 - `Get-RemoteSystemInfo` - Shows OS, uptime, logged-on user, memory, and disk space for one or more computers.
+- `Restart-RemoteExplorer` - Restarts explorer.exe for one user (`-UserName`) or every session on one or more computers, falling back to a one-time scheduled task if Windows does not relaunch it; `-WhatIf` for a dry run.
 
 ### Utility
 
@@ -68,6 +69,8 @@ Worked examples for every command, including combined and piped uses, are in
 - `grep` - Searches files or piped output for a pattern, grep-style (`-i -r -v -n -l -c`); use `rg` (ripgrep, installed by Bootstrap) for big folders.
 - `Copy-FolderFast` (`fcopy`) - Copies a folder with multithreaded robocopy, skipping files already at the destination unless `-Overwrite`; leave out a path to pick it in a folder dialog, `-WhatIf` for a dry run.
 - `Update-FileAccessIndex` - Scans share folder permissions (folders only) and saves an index of every folder with explicit permissions or blocked inheritance; run it weekly as a scheduled task. Roots and index location come from `FileAccessRoots` and `FileAccessIndexPath` in `config.psd1`.
+
+- `Find-SensitiveData` (`piiscan`) - Read-only scan of a local drive (default: C:\Users and the other top-level folders on C:) for PII (SSNs, card and bank numbers, DOB, license and passport numbers) and secrets (private keys, API tokens, config passwords, key stores); writes a CSV with masked samples. The report maps where sensitive data lives, so delete it after triage.
 
 ### Git
 
