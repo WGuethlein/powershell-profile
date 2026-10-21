@@ -44,7 +44,6 @@
         'Copy-FolderFast'
         'Update-FileAccessIndex'
         'Get-FileAccess'
-        'Find-SensitiveData'
         'push'
         'pull'
         'commit'
@@ -52,5 +51,5 @@
     )
     CmdletsToExport   = @()
     VariablesToExport = @()
-    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset', 'm365info', 'table', 'mydc', 'fcopy', 'faccess', 'piiscan')
+    AliasesToExport   = @('Get-PwdExp', 'tail', 'ibr', 'gir', 'get', 'post', 'B64E', 'tools', 'adinfo', 'extfwd', 'tp', 'laps', 'lapsreset', 'm365info', 'table', 'mydc', 'fcopy', 'faccess')
 }
